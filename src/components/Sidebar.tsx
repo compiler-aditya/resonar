@@ -9,21 +9,30 @@ import {
   ProfileIcon,
   MicIcon,
 } from "./Icons";
+import { useGuest, initialFor } from "./UseGuest";
 
 const NAV: Array<{
-  href: string;
   label: string;
   icon: typeof HomeIcon;
+  href: (guestId: string | null) => string;
   match: (p: string) => boolean;
 }> = [
-  { href: "/feed", label: "Home", icon: HomeIcon, match: (p) => p === "/" || p.startsWith("/feed") },
-  { href: "/search", label: "Search", icon: SearchIcon, match: (p) => p.startsWith("/search") },
-  { href: "/daily", label: "Daily", icon: LibraryIcon, match: (p) => p.startsWith("/daily") },
-  { href: "/profile", label: "Profile", icon: ProfileIcon, match: (p) => p.startsWith("/profile") },
+  { label: "Home", icon: HomeIcon, href: () => "/feed", match: (p) => p === "/" || p.startsWith("/feed") },
+  { label: "Search", icon: SearchIcon, href: () => "/search", match: (p) => p.startsWith("/search") },
+  { label: "Daily", icon: LibraryIcon, href: () => "/daily", match: (p) => p.startsWith("/daily") },
+  {
+    label: "Profile",
+    icon: ProfileIcon,
+    href: (guestId) => (guestId ? `/profile/${guestId}` : "/feed"),
+    match: (p) => p.startsWith("/profile"),
+  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname() || "/";
+  const guest = useGuest();
+  const username = guest?.username;
+  const guestId = guest?.guestId ?? null;
 
   return (
     <aside className="hidden lg:flex h-screen sticky top-0 flex-col px-5 py-7 gap-1">
@@ -39,10 +48,11 @@ export default function Sidebar() {
       <nav className="flex flex-col gap-1">
         {NAV.map((item) => {
           const active = item.match(pathname);
+          const href = item.href(guestId);
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={item.label}
+              href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-full transition-colors ${
                 active
                   ? "bg-plum text-cream"
@@ -65,22 +75,32 @@ export default function Sidebar() {
       </Link>
 
       <div className="mt-auto pt-6">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-full bg-olive text-cream flex items-center justify-center font-semibold text-sm shadow-cozy-sm">
-            U
-          </div>
-          <div className="min-w-0">
-            <div className="font-sans text-sm font-semibold text-espresso truncate">
-              Anonymous
+        {username && guestId ? (
+          <Link
+            href={`/profile/${guestId}`}
+            className="flex items-center gap-3 px-2 py-2 rounded-2xl hover:bg-cream-soft transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-olive text-cream flex items-center justify-center font-semibold text-sm shadow-cozy-sm shrink-0">
+              {initialFor(username)}
             </div>
-            <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-espresso-faint">
-              guest mode
+            <div className="min-w-0">
+              <div className="font-sans text-sm font-semibold text-espresso truncate">
+                {username}
+              </div>
+              <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-espresso-faint">
+                you
+              </div>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 px-2 py-2">
+            <div className="w-10 h-10 rounded-full bg-cream-soft animate-pulse" />
+            <div className="space-y-1.5">
+              <div className="w-24 h-2 rounded bg-cream-soft animate-pulse" />
+              <div className="w-12 h-1.5 rounded bg-cream-soft animate-pulse" />
             </div>
           </div>
-        </div>
-        <div className="font-sans text-[10px] text-espresso-faint mt-4 px-2 leading-relaxed">
-          Built with turbopuffer + ElevenLabs · ElevenHacks
-        </div>
+        )}
       </div>
     </aside>
   );

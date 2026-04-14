@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HomeIcon, SearchIcon, LibraryIcon, ProfileIcon } from "./Icons";
+import { useGuest } from "./UseGuest";
 
 export default function BottomNav() {
   const pathname = usePathname() || "/";
+  const guest = useGuest();
+  const profileHref = guest?.guestId ? `/profile/${guest.guestId}` : "/feed";
   const isActive = (p: string) => {
     if (p === "/") return pathname === "/";
     return pathname.startsWith(p);
@@ -23,7 +26,7 @@ export default function BottomNav() {
             <TabItem href="/search" label="SEARCH" icon={<SearchIcon className="w-6 h-6" />} active={isActive("/search")} />
             <div className="flex justify-center" />
             <TabItem href="/daily" label="DAILY" icon={<LibraryIcon className="w-6 h-6" />} active={isActive("/daily")} />
-            <TabItem href="/profile" label="PROFILE" icon={<ProfileIcon className="w-6 h-6" />} active={isActive("/profile")} />
+            <TabItem href={profileHref} label="PROFILE" icon={<ProfileIcon className="w-6 h-6" />} active={isActive("/profile")} />
           </div>
 
           {/* Center floating record button */}

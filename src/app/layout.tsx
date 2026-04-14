@@ -5,6 +5,7 @@ import PageTransition from "@/components/PageTransition";
 import BottomNav from "@/components/BottomNav";
 import Sidebar from "@/components/Sidebar";
 import RightRail from "@/components/RightRail";
+import MobileProfileButton from "@/components/MobileProfileButton";
 import { MicIcon } from "@/components/Icons";
 import "./globals.css";
 
@@ -62,13 +63,7 @@ export default function RootLayout({
               >
                 <MicIcon className="w-5 h-5" />
               </Link>
-              <Link
-                href="/profile"
-                aria-label="Your profile"
-                className="w-10 h-10 rounded-full bg-plum text-cream flex items-center justify-center font-semibold text-sm hover:bg-plum-deep transition-colors shadow-cozy-sm"
-              >
-                U
-              </Link>
+              <MobileProfileButton />
             </div>
           </div>
         </header>

@@ -193,6 +193,31 @@ export async function hybridSearchStories(
   return fused.map((r) => rowToStory(r as unknown as Row));
 }
 
+export async function topStoryByEmotion(
+  emotion: string,
+  sinceIso: string,
+): Promise<StoryRow | null> {
+  const res = await storiesNs().query({
+    rank_by: ["total_reactions", "desc"],
+    filters: [
+      "And",
+      [
+        ["is_public", "Eq", true],
+        ["emotion_primary", "Eq", emotion],
+        ["created_at", "Gte", sinceIso],
+      ],
+    ] as Filter,
+    top_k: 5,
+    include_attributes: STORY_LIST_ATTRS,
+  });
+  const rows = (res.rows ?? [])
+    .map(rowToStory)
+    .filter((s) => !s.id.startsWith("__warmup"));
+  if (rows.length === 0) return null;
+  // prefer rows with an atmosphere track
+  return rows.find((s) => s.audio_atmosphere_url) ?? rows[0];
+}
+
 export async function trendingStories(hoursBack = 24, limit = 50): Promise<StoryRow[]> {
   const since = new Date(Date.now() - hoursBack * 3600 * 1000).toISOString();
   const res = await storiesNs().query({

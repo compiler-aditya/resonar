@@ -127,27 +127,29 @@ export async function assembleThread(input: ThreadAssemblyInput): Promise<Buffer
 export interface DailyEchoAssemblyInput {
   introMusic: Buffer;
   narrationIntro: Buffer;
-  story1: Buffer;
-  narrationTransition1: Buffer;
-  story2: Buffer;
-  narrationTransition2: Buffer;
-  story3: Buffer;
+  stories: Buffer[];
+  narrationTransitions: Buffer[];
   narrationClosing: Buffer;
   outroMusic: Buffer;
 }
 
 export async function assembleDailyEcho(input: DailyEchoAssemblyInput): Promise<Buffer> {
-  return concatSegments([
+  const segments: AudioSegment[] = [
     { audio: input.introMusic },
     { audio: input.narrationIntro },
-    { audio: input.story1 },
-    { audio: input.narrationTransition1 },
-    { audio: input.story2 },
-    { audio: input.narrationTransition2 },
-    { audio: input.story3 },
-    { audio: input.narrationClosing },
-    { audio: input.outroMusic },
-  ]);
+  ];
+  for (let i = 0; i < input.stories.length; i++) {
+    segments.push({ audio: input.stories[i] });
+    if (i < input.stories.length - 1) {
+      const transition = input.narrationTransitions[i];
+      if (transition && transition.length > 0) {
+        segments.push({ audio: transition });
+      }
+    }
+  }
+  segments.push({ audio: input.narrationClosing });
+  segments.push({ audio: input.outroMusic });
+  return concatSegments(segments);
 }
 
 export async function trimToSnippet(buffer: Buffer, seconds: number): Promise<Buffer> {

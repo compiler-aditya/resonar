@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import PageTransition from "@/components/PageTransition";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Resonar · Stories that find each other",
-  description: "An audio social platform for real voice stories with AI-generated atmosphere.",
+  description:
+    "An audio social platform for real voice stories with AI-generated atmosphere, powered by turbopuffer + ElevenLabs.",
+  openGraph: {
+    title: "Resonar · Stories that find each other",
+    description:
+      "An audio social platform for real voice stories with AI-generated atmosphere.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -20,15 +28,17 @@ export default function RootLayout({
             <Link href="/" className="text-lg font-semibold tracking-tight">
               Resonar
             </Link>
-            <div className="flex items-center gap-4 text-sm text-white/70">
+            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-white/70">
               <Link href="/feed" className="hover:text-white">Feed</Link>
-              <Link href="/search" className="hover:text-white">Search</Link>
+              <Link href="/search" className="hidden sm:inline hover:text-white">Search</Link>
               <Link href="/record" className="hover:text-white">Record</Link>
               <Link href="/daily" className="hover:text-white">Daily</Link>
             </div>
           </nav>
         </header>
-        <main className="max-w-5xl mx-auto px-4 py-6">{children}</main>
+        <main className="max-w-5xl mx-auto px-4 py-6">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </body>
     </html>
   );

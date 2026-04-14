@@ -6,6 +6,7 @@ import { uploadAudio, storyAtmosphereKey } from "../lib/storage";
 import { insertStory, patchStory } from "../lib/turbopuffer";
 import type { StoryRow } from "../lib/turbopuffer";
 import type { ProcessStoryJobData } from "../lib/jobs";
+import { buildThreadForStory } from "./buildThread";
 
 export async function processStoryJob(data: ProcessStoryJobData): Promise<string> {
   const { guestId, username, rawAudioUrl, durationSeconds, promptId } = data;
@@ -71,6 +72,10 @@ export async function processStoryJob(data: ProcessStoryJobData): Promise<string
     const atmosphereUrl = await uploadAudio(storyAtmosphereKey(storyId), mixed);
     await patchStory(storyId, { audio_atmosphere_url: atmosphereUrl });
     console.log(`[processStory ${storyId}] atmosphere attached`);
+
+    buildThreadForStory(storyId).catch((err) =>
+      console.error(`[processStory ${storyId}] buildThread failed`, err),
+    );
   } catch (err) {
     console.error(`[processStory ${storyId}] atmosphere failed`, err);
   }

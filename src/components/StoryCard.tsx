@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import ReactionBar from "./ReactionBar";
 
@@ -24,6 +25,7 @@ export interface StoryCardData {
   total_reactions: number;
   total_listens: number;
   created_at: string;
+  thread_ids?: string[];
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -149,6 +151,18 @@ export default function StoryCard({ story }: { story: StoryCardData }) {
           hugged: live.react_hugged,
         }}
       />
+
+      {live.thread_ids && live.thread_ids.length > 0 && (
+        <Link
+          href={`/thread/${live.thread_ids[0]}`}
+          className="block rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/5 px-4 py-2.5 text-xs hover:bg-fuchsia-400/10 transition"
+        >
+          <span className="text-fuchsia-300">Resonance Thread →</span>{" "}
+          <span className="text-white/60">
+            This story echoes with others.
+          </span>
+        </Link>
+      )}
     </article>
   );
 }

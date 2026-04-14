@@ -250,6 +250,36 @@ export async function incrementReactionCounter(storyId: string, reactionType: Re
   } as Partial<StoryRow>);
 }
 
+export async function findSimilarStoriesForThread(
+  vector: number[],
+  excludeStoryId: string,
+  excludeGuestId: string,
+  limit = 8,
+): Promise<StoryRow[]> {
+  const res = await storiesNs().query({
+    rank_by: ["vector", "ANN", vector],
+    filters: [
+      "And",
+      [
+        ["is_public", "Eq", true],
+        ["id", "NotEq", excludeStoryId],
+        ["guest_id", "NotEq", excludeGuestId],
+        ["emotion_intensity", "Gte", 4],
+      ],
+    ] as Filter,
+    top_k: limit,
+    include_attributes: STORY_LIST_ATTRS,
+  });
+  return (res.rows ?? []).map(rowToStory);
+}
+
+export async function attachStoryToThread(storyId: string, threadId: string) {
+  const story = await getStory(storyId);
+  if (!story) return;
+  const next = Array.from(new Set([...(story.thread_ids || []), threadId]));
+  await patchStory(storyId, { thread_ids: next });
+}
+
 export async function listUserStories(guestId: string, limit = 100): Promise<StoryRow[]> {
   const res = await storiesNs().query({
     rank_by: ["created_at", "desc"],

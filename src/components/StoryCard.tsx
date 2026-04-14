@@ -7,6 +7,7 @@ import ReactionBar from "./ReactionBar";
 
 export interface StoryCardData {
   id: string;
+  guest_id?: string;
   username: string;
   country: string;
   emotion_primary: string;
@@ -85,7 +86,16 @@ export default function StoryCard({ story }: { story: StoryCardData }) {
             className="inline-block w-2 h-2 rounded-full"
             style={{ backgroundColor: moodColor }}
           />
-          <span className="text-white/90 font-medium">{live.username}</span>
+          {live.guest_id ? (
+            <Link
+              href={`/profile/${live.guest_id}`}
+              className="text-white/90 font-medium hover:underline"
+            >
+              {live.username}
+            </Link>
+          ) : (
+            <span className="text-white/90 font-medium">{live.username}</span>
+          )}
           <span>·</span>
           <span>{live.country || "—"}</span>
           <span>·</span>

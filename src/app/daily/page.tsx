@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import Link from "next/link";
+import { PlayIcon } from "@/components/Icons";
 
 interface Episode {
   id: string;
@@ -25,62 +26,61 @@ export default function DailyPage() {
   );
 
   return (
-    <div className="py-10 max-w-3xl mx-auto space-y-8">
-      <header className="space-y-1">
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
-          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-          DAILY BROADCAST · {new Date().toISOString().slice(0, 10)}
+    <div className="py-3 space-y-6">
+      <header className="space-y-2">
+        <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
+          Daily Resonance · {new Date().toISOString().slice(0, 10)}
         </div>
-        <h1 className="font-sans text-4xl font-semibold tracking-tight">
-          Daily Resonance
+        <h1 className="font-sans text-3xl font-semibold text-espresso">
+          The world,{" "}
+          <span className="serif-italic font-normal text-plum">today.</span>
         </h1>
-        <p className="font-sans text-ink-soft text-base max-w-xl">
-          An AI-narrated 5-minute episode of the world&apos;s collective mood,
-          stitched together from the day&apos;s most-felt stories.
+        <p className="font-sans text-sm text-espresso-soft max-w-md">
+          A 5-minute episode stitched from the day&apos;s most-felt stories,
+          narrated by AI.
         </p>
       </header>
 
       {isLoading && (
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
-          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-          TUNING IN…
+        <div className="text-espresso-faint text-sm flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-sienna soft-pulse" />
+          Tuning in…
         </div>
       )}
 
       {data?.episode ? (
-        <article className="tape-card">
-          <div className="px-4 py-2 border-b border-ink bg-ink text-paper font-mono text-[11px] uppercase tracking-caps flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span className="inline-block w-2 h-2 bg-signal" />
-              DAILY · EPISODE
-            </span>
-            <span className="text-paper/60">
-              {Math.round((data.episode.thread_duration_seconds || 0) / 60)} MIN · {data.episode.story_count} VOICES
-            </span>
-          </div>
-          <div className="px-5 py-5 space-y-4">
-            <h2 className="font-sans text-2xl font-semibold leading-snug">{data.episode.title}</h2>
-            <p className="font-sans text-ink-soft text-[16px] leading-relaxed">
-              {data.episode.shared_theme}
+        <article className="cozy-card overflow-hidden">
+          <div className="bg-plum-tint p-5 space-y-2">
+            <h2 className="font-sans text-2xl font-semibold text-espresso leading-snug">
+              {data.episode.title}
+            </h2>
+            <p className="serif-italic text-espresso-soft text-base leading-relaxed">
+              &ldquo;{data.episode.shared_theme}&rdquo;
             </p>
             {data.episode.countries?.length ? (
-              <div className="font-mono text-[10px] uppercase tracking-caps text-ink-faint">
-                TRANSMITTING FROM {data.episode.countries.join(" · ")}
+              <div className="font-sans text-[10px] uppercase tracking-[0.12em] text-espresso-faint pt-1">
+                voices from {data.episode.countries.join(" · ")}
               </div>
             ) : null}
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="flex items-center gap-2 text-xs text-espresso-faint">
+              <PlayIcon className="w-3.5 h-3.5 text-plum" />
+              <span>{data.episode.story_count} voices · {Math.round((data.episode.thread_duration_seconds || 0) / 60)} min</span>
+            </div>
             <audio controls src={data.episode.thread_audio_url} className="w-full" />
-            <div className="pt-2 border-t border-tape">
-              <div className="font-mono text-[10px] uppercase tracking-caps text-ink-faint mb-2">
-                CONSTITUENT TRACKS
+            <div className="pt-3 border-t border-espresso/10 space-y-2">
+              <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
+                Constituent voices
               </div>
               <div className="flex flex-wrap gap-2">
                 {data.episode.story_ids?.map((id, i) => (
                   <Link
                     key={id}
                     href={`/story/${id}`}
-                    className="inline-flex items-center gap-2 px-3 py-1 border border-ink font-mono text-[10px] uppercase tracking-caps hover:bg-ink hover:text-paper transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sand-soft hover:bg-plum-tint hover:text-plum transition-colors font-sans text-xs font-medium text-espresso-soft"
                   >
-                    TRK_{String(i + 1).padStart(2, "0")} ▸
+                    Story {i + 1} →
                   </Link>
                 ))}
               </div>
@@ -89,14 +89,13 @@ export default function DailyPage() {
         </article>
       ) : (
         !isLoading && (
-          <div className="border border-tape bg-paper-deep px-6 py-10 space-y-3">
-            <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
-              DEAD AIR · TODAY&apos;S EPISODE ISN&apos;T READY YET
+          <div className="cozy-card p-8 text-center space-y-2">
+            <div className="font-sans text-base font-medium text-espresso">
+              Today&apos;s episode is still being mixed.
             </div>
-            <p className="font-sans text-ink-soft text-sm max-w-lg">
+            <p className="font-sans text-sm text-espresso-faint">
               Daily Resonance is produced once per day from the stories shared
-              in the last 24 hours. Waiting on: emotional aggregation →
-              narrator script → Music API theme → FFmpeg assembly.
+              in the last 24 hours. Check back in a bit.
             </p>
           </div>
         )

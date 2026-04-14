@@ -13,17 +13,16 @@ interface WaveformProps {
 }
 
 /**
- * A deterministic VU-meter-style waveform: blocky stepped bars, no curves.
- * The bar pattern is seeded from the story id so the same story always
- * looks identical between renders.
+ * Soft rounded-bar waveform in the lo-fi cassette style.
+ * Deterministic per `seed` so the same story always looks identical.
  */
 export default function Waveform({
   seed,
-  bars = 64,
+  bars = 42,
   progress = 0,
-  color = "var(--signal)",
-  trackColor = "var(--tape)",
-  height = 48,
+  color = "var(--sienna)",
+  trackColor = "rgba(61, 47, 40, 0.12)",
+  height = 40,
   className = "",
 }: WaveformProps) {
   const amplitudes = useMemo(() => generateAmplitudes(seed, bars), [seed, bars]);
@@ -31,21 +30,22 @@ export default function Waveform({
 
   return (
     <div
-      className={`flex items-end gap-[2px] ${className}`}
+      className={`flex items-center gap-[3px] ${className}`}
       style={{ height }}
       aria-hidden="true"
     >
       {amplitudes.map((a, i) => {
         const h = Math.max(0.12, a) * height;
+        const played = i <= playedIndex;
         return (
           <span
             key={i}
-            className="flex-1"
+            className="flex-1 rounded-full transition-colors"
             style={{
               height: `${h}px`,
-              background: i <= playedIndex ? color : trackColor,
+              background: played ? color : trackColor,
               display: "inline-block",
-              minWidth: "2px",
+              minWidth: "3px",
             }}
           />
         );
@@ -55,7 +55,6 @@ export default function Waveform({
 }
 
 function generateAmplitudes(seed: string, count: number): number[] {
-  // Mulberry32 PRNG seeded by a hash of the story id
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
     h ^= seed.charCodeAt(i);
@@ -70,12 +69,11 @@ function generateAmplitudes(seed: string, count: number): number[] {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 
-  // Produce a shape that rises to a peak in the middle then tapers,
-  // modulated by pseudo-random noise for VU-meter realism.
+  // Early envelope that rises quickly then tapers, for a cassette-meter feel
   return Array.from({ length: count }, (_, i) => {
     const pos = i / (count - 1);
-    const envelope = Math.sin(pos * Math.PI) * 0.55 + 0.25;
+    const envelope = Math.sin(pos * Math.PI) * 0.6 + 0.3;
     const jitter = rand();
-    return Math.min(1, envelope * (0.55 + jitter * 0.65));
+    return Math.min(1, envelope * (0.4 + jitter * 0.8));
   });
 }

@@ -1,15 +1,16 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { HeartIcon, ChatIcon, SnowflakeIcon, HugIcon, SmileIcon } from "./Icons";
 
 export type ReactionType = "felt_this" | "laughed" | "chills" | "me_too" | "hugged";
 
-const REACTIONS: Array<{ type: ReactionType; glyph: string; label: string }> = [
-  { type: "felt_this", glyph: "♡", label: "FELT" },
-  { type: "laughed", glyph: "笑", label: "LAUGH" },
-  { type: "chills", glyph: "❄", label: "CHILLS" },
-  { type: "me_too", glyph: "⧗", label: "ME-TOO" },
-  { type: "hugged", glyph: "◉", label: "HUG" },
+const REACTIONS: Array<{ type: ReactionType; Icon: typeof HeartIcon; label: string }> = [
+  { type: "felt_this", Icon: HeartIcon, label: "Felt this" },
+  { type: "laughed", Icon: SmileIcon, label: "Laughed" },
+  { type: "chills", Icon: SnowflakeIcon, label: "Chills" },
+  { type: "me_too", Icon: ChatIcon, label: "Me too" },
+  { type: "hugged", Icon: HugIcon, label: "Hugged" },
 ];
 
 export interface ReactionCounts {
@@ -23,9 +24,11 @@ export interface ReactionCounts {
 export default function ReactionBar({
   storyId,
   initial,
+  compact = false,
 }: {
   storyId: string;
   initial: ReactionCounts;
+  compact?: boolean;
 }) {
   const [counts, setCounts] = useState<ReactionCounts>(initial);
   const [pending, setPending] = useState<ReactionType | null>(null);
@@ -66,25 +69,29 @@ export default function ReactionBar({
     [storyId, pending, play],
   );
 
+  // Show the top 2-3 reactions to match the reference layout
+  const visibleReactions = compact ? REACTIONS.slice(0, 2) : REACTIONS.slice(0, 3);
+
   return (
-    <div className="grid grid-cols-5 border border-ink font-mono text-[10px] uppercase tracking-caps font-mono-tight">
-      {REACTIONS.map((r, i) => {
+    <div className="flex items-center gap-1.5">
+      {visibleReactions.map((r) => {
         const isClicked = clicked === r.type;
+        const count = counts[r.type];
         return (
           <button
             key={r.type}
             onClick={() => react(r.type)}
-            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 transition-colors ${
-              i > 0 ? "border-l border-ink" : ""
-            } ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all ${
               isClicked
-                ? "bg-signal text-paper"
-                : "bg-paper text-ink hover:bg-ink hover:text-paper"
+                ? "bg-plum text-cream scale-105"
+                : "bg-sand-soft text-espresso-soft hover:bg-plum-tint hover:text-plum"
             }`}
             aria-label={r.label}
           >
-            <span className="text-[11px]">{r.glyph}</span>
-            <span className="tabular-nums">{String(counts[r.type]).padStart(2, "0")}</span>
+            <r.Icon className="w-3.5 h-3.5" />
+            <span className="font-sans text-[11px] font-semibold tabular-nums">
+              {count}
+            </span>
           </button>
         );
       })}

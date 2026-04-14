@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { MicIcon } from "./Icons";
 
 const DURATIONS = [30, 60, 120, 180] as const;
 
@@ -86,7 +87,7 @@ export default function Recorder() {
       }, 1000);
     } catch (err) {
       console.error(err);
-      setError((err as Error).message || "COULD NOT ACCESS MICROPHONE");
+      setError((err as Error).message || "Could not access microphone");
       setPhase("error");
     }
   }
@@ -142,7 +143,7 @@ export default function Recorder() {
       router.push("/feed");
     } catch (err) {
       console.error(err);
-      setError((err as Error).message.toUpperCase());
+      setError((err as Error).message);
       setPhase("error");
     }
   }
@@ -151,24 +152,22 @@ export default function Recorder() {
   const bars = Array.from({ length: barCount }).map((_, i) => {
     const base = Math.min(1, level * 4.5);
     const jitter = (Math.sin((i + elapsed * 4) * 0.6) + 1) / 2;
-    const h = phase === "recording" ? Math.max(0.12, base * (0.4 + jitter * 0.6)) : 0.08;
-    return h;
+    return phase === "recording" ? Math.max(0.12, base * (0.4 + jitter * 0.6)) : 0.1;
   });
 
   const fmtTime = fmt(elapsed);
   const fmtMax = fmt(maxSeconds);
 
   return (
-    <div className="max-w-xl mx-auto py-8 space-y-6">
-      <header className="space-y-1">
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
-          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-          {promptId ? "RESPONDING TO A WHISPER" : "NEW TRANSMISSION"}
+    <div className="py-3 space-y-5">
+      <header className="space-y-2">
+        <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
+          {promptId ? "Responding to a whisper" : "New story"}
         </div>
-        <h1 className="font-sans text-3xl font-semibold">
+        <h1 className="font-sans text-3xl font-semibold text-espresso">
           {promptId ? "Answer the whisper" : "Share a voice story"}
         </h1>
-        <p className="font-sans text-ink-soft text-sm max-w-md">
+        <p className="font-sans text-sm text-espresso-soft max-w-md">
           Up to {maxSeconds}s. AI will wrap it in matching music and ambient
           sound after you publish.
         </p>
@@ -176,117 +175,107 @@ export default function Recorder() {
 
       {/* Duration selector */}
       {phase === "idle" && (
-        <div className="border border-ink">
-          <div className="px-3 py-1.5 border-b border-ink bg-paper-deep font-mono text-[10px] uppercase tracking-caps text-ink-faint">
-            RUNTIME
-          </div>
-          <div className="grid grid-cols-4">
-            {DURATIONS.map((d, i) => (
-              <button
-                key={d}
-                onClick={() => setMaxSeconds(d)}
-                className={`px-3 py-3 font-mono text-[11px] uppercase tracking-caps ${
-                  i > 0 ? "border-l border-ink" : ""
-                } ${
-                  maxSeconds === d
-                    ? "bg-ink text-paper"
-                    : "bg-paper text-ink hover:bg-ink/5"
-                }`}
-              >
-                {d === 30 ? "30 SEC" : d === 60 ? "1 MIN" : d === 120 ? "2 MIN" : "3 MIN"}
-              </button>
-            ))}
-          </div>
+        <div className="flex gap-2 flex-wrap">
+          {DURATIONS.map((d) => (
+            <button
+              key={d}
+              onClick={() => setMaxSeconds(d)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                maxSeconds === d
+                  ? "bg-plum text-cream shadow-cozy-sm"
+                  : "bg-cream text-espresso-soft hover:bg-plum-tint hover:text-plum"
+              }`}
+            >
+              {d === 30 ? "30s" : d === 60 ? "1 min" : d === 120 ? "2 min" : "3 min"}
+            </button>
+          ))}
         </div>
       )}
 
       {/* Deck */}
-      <div className="tape-card">
-        <div className="px-4 py-2 border-b border-ink bg-paper-deep flex items-center justify-between font-mono text-[11px] uppercase tracking-caps font-mono-tight">
+      <div className="cozy-card p-5 space-y-5">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`inline-block w-2 h-2 ${phase === "recording" ? "bg-signal vu-pulse" : "bg-ink/30"}`} />
-            <span>
+            <span className={`inline-block w-2 h-2 rounded-full ${phase === "recording" ? "bg-sienna soft-pulse" : "bg-espresso/20"}`} />
+            <span className="font-sans text-xs font-medium text-espresso-soft">
               {phase === "recording"
-                ? "REC ● LIVE"
+                ? "Recording"
                 : phase === "preview"
-                ? "REC ◼ STOPPED"
+                ? "Preview"
                 : phase === "publishing"
-                ? "TRANSMITTING…"
+                ? "Publishing…"
                 : phase === "error"
-                ? "ERROR"
-                : "REC ◉ READY"}
+                ? "Error"
+                : "Ready"}
             </span>
           </div>
-          <span className="text-ink font-semibold">
-            {fmtTime} / {fmtMax}
+          <span className="font-sans text-sm font-semibold text-espresso tabular-nums">
+            {fmtTime} <span className="text-espresso-faint font-normal">/ {fmtMax}</span>
           </span>
         </div>
 
-        {/* VU bar display */}
-        <div className="mx-4 my-4 bg-ink p-3 border border-ink">
-          <div className="flex items-end gap-[3px]" style={{ height: 56 }}>
+        <div className="bg-plum-mist rounded-[18px] p-4">
+          <div className="flex items-center gap-[3px]" style={{ height: 56 }}>
             {bars.map((h, i) => (
               <span
                 key={i}
-                className="flex-1"
+                className="flex-1 rounded-full transition-all"
                 style={{
-                  height: `${Math.max(4, h * 100)}%`,
+                  height: `${Math.max(6, h * 100)}%`,
                   minWidth: "3px",
-                  background: phase === "recording" ? "#e8754a" : "#3a3530",
+                  background: phase === "recording" ? "var(--sienna)" : "rgba(61, 47, 40, 0.18)",
                 }}
               />
             ))}
           </div>
         </div>
 
-        {/* Transport */}
-        <div className="px-4 pb-4">
-          {phase === "idle" || phase === "error" ? (
-            <button
-              onClick={startRecording}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-signal text-paper font-mono text-xs uppercase tracking-caps hover:bg-signal-deep transition-colors shadow-tape-sm"
-            >
-              <span className="inline-block w-2 h-2 rounded-full bg-paper" />
-              ◉ START RECORDING
-            </button>
-          ) : phase === "recording" ? (
-            <button
-              onClick={stopRecording}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-caps hover:bg-signal transition-colors shadow-tape-sm"
-            >
-              ◼ STOP RECORDING
-            </button>
-          ) : phase === "preview" && blob ? (
-            <div className="space-y-3">
-              <audio controls className="w-full" src={URL.createObjectURL(blob)} />
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={reset}
-                  className="px-3 py-2.5 border border-ink font-mono text-[11px] uppercase tracking-caps hover:bg-ink hover:text-paper transition-colors"
-                >
-                  [ RE-RECORD ]
-                </button>
-                <button
-                  onClick={publish}
-                  className="px-3 py-2.5 bg-signal text-paper font-mono text-[11px] uppercase tracking-caps hover:bg-signal-deep transition-colors shadow-tape-sm"
-                >
-                  ◉ PUBLISH TO FEED
-                </button>
-              </div>
+        {phase === "idle" || phase === "error" ? (
+          <button
+            onClick={startRecording}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full bg-plum text-cream font-sans text-sm font-semibold hover:bg-plum-deep transition-colors shadow-cozy-sm"
+          >
+            <MicIcon className="w-5 h-5" />
+            Start recording
+          </button>
+        ) : phase === "recording" ? (
+          <button
+            onClick={stopRecording}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full bg-rust text-cream font-sans text-sm font-semibold hover:bg-rust/90 transition-colors shadow-cozy-sm"
+          >
+            <span className="w-3 h-3 rounded-sm bg-cream" />
+            Stop recording
+          </button>
+        ) : phase === "preview" && blob ? (
+          <div className="space-y-3">
+            <audio controls className="w-full" src={URL.createObjectURL(blob)} />
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={reset}
+                className="px-3 py-3 rounded-full bg-sand-soft text-espresso-soft font-sans text-sm font-medium hover:bg-plum-tint hover:text-plum transition-colors"
+              >
+                Re-record
+              </button>
+              <button
+                onClick={publish}
+                className="px-3 py-3 rounded-full bg-plum text-cream font-sans text-sm font-semibold hover:bg-plum-deep transition-colors shadow-cozy-sm"
+              >
+                Publish ↗
+              </button>
             </div>
-          ) : phase === "publishing" ? (
-            <div className="py-4 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-caps text-ink">
-              <span className="inline-block w-2 h-2 bg-signal vu-pulse" />
-              TRANSMITTING…
-            </div>
-          ) : null}
+          </div>
+        ) : phase === "publishing" ? (
+          <div className="py-3 flex items-center justify-center gap-2 text-sm text-espresso-soft">
+            <span className="w-1.5 h-1.5 rounded-full bg-sienna soft-pulse" />
+            Wrapping warm…
+          </div>
+        ) : null}
 
-          {error && (
-            <div className="mt-3 px-3 py-2 border border-signal-deep bg-signal/10 font-mono text-[10px] uppercase tracking-caps text-signal-deep">
-              {error}
-            </div>
-          )}
-        </div>
+        {error && (
+          <div className="px-3 py-2 rounded-2xl bg-rust-soft text-rust text-xs font-medium">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

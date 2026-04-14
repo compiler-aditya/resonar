@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { MicIcon, PlayIcon, PauseIcon } from "./Icons";
 
 export interface WhisperPrompt {
   id: string;
@@ -30,33 +31,33 @@ export default function WhisperPromptCard({ prompt }: { prompt: WhisperPrompt })
   };
 
   return (
-    <article className="border border-ink bg-paper-deep shadow-tape-sm">
-      <div className="px-4 py-2 border-b border-ink flex items-center justify-between font-mono text-[11px] uppercase tracking-caps">
-        <div className="flex items-center gap-2">
-          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-          <span className="text-signal font-semibold">WHISPER PROMPT</span>
-        </div>
-        <span className="text-ink-faint">TARGET · {prompt.target_emotion.toUpperCase()}</span>
+    <article className="cozy-card-tint p-5 space-y-3 relative overflow-hidden">
+      {/* Soft decorative corner accent */}
+      <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-plum-mist opacity-60 -translate-y-8 translate-x-8" />
+
+      <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna relative">
+        A Whisper Prompt
       </div>
-      <div className="px-5 py-5 space-y-4">
-        <p className="font-sans text-[19px] text-ink leading-relaxed">
-          &ldquo;{prompt.prompt_text}&rdquo;
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggle}
-            className="inline-flex items-center justify-center w-8 h-8 border border-ink bg-paper hover:bg-signal hover:text-paper transition-colors font-mono text-sm"
-            aria-label={playing ? "Pause" : "Play prompt"}
-          >
-            {playing ? "◼" : "▸"}
-          </button>
-          <Link
-            href={`/record?prompt=${prompt.id}`}
-            className="ml-auto inline-flex items-center gap-2 px-4 py-2 bg-ink text-paper font-mono text-[11px] uppercase tracking-caps hover:bg-signal transition-colors"
-          >
-            ◉ RESPOND WITH A VOICE NOTE
-          </Link>
-        </div>
+
+      <p className="serif-italic text-espresso text-[20px] leading-[1.4] relative">
+        &ldquo;{prompt.prompt_text}&rdquo;
+      </p>
+
+      <div className="flex items-center gap-2 pt-1 relative">
+        <button
+          onClick={toggle}
+          className="w-9 h-9 rounded-full bg-cream text-plum flex items-center justify-center shadow-cozy-sm hover:bg-plum-mist transition-colors"
+          aria-label={playing ? "Pause" : "Listen"}
+        >
+          {playing ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4 ml-0.5" />}
+        </button>
+        <Link
+          href={`/record?prompt=${prompt.id}`}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-olive text-cream font-sans text-[12px] font-semibold hover:bg-olive-soft transition-colors shadow-cozy-sm"
+        >
+          <MicIcon className="w-4 h-4" />
+          Respond
+        </Link>
       </div>
     </article>
   );

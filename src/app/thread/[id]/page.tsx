@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import Link from "next/link";
 import type { StoryCardData } from "@/components/StoryCard";
+import { FlowerIcon } from "@/components/Icons";
 
 interface ThreadData {
   id: string;
@@ -28,71 +29,70 @@ export default function ThreadPage({ params }: { params: { id: string } }) {
 
   if (isLoading) {
     return (
-      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
-        <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-        TUNING IN…
+      <div className="py-10 text-espresso-faint text-sm flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-sienna soft-pulse" />
+        Tuning in…
       </div>
     );
   }
-  if (error || !data?.thread)
-    return (
-      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-signal">
-        SIGNAL LOST — THREAD NOT FOUND
-      </div>
-    );
+  if (error || !data?.thread) {
+    return <div className="py-10 text-rust text-sm">Thread not found.</div>;
+  }
 
   const { thread, stories } = data;
 
   return (
-    <div className="py-10 max-w-3xl mx-auto space-y-8">
-      <header className="space-y-1">
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
-          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-          RESONANCE THREAD · {thread.story_count} VOICES
+    <div className="py-3 space-y-6">
+      <header className="space-y-2">
+        <div className="flex items-center gap-2 font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-olive">
+          <FlowerIcon className="w-4 h-4" />
+          Resonance Thread · {thread.story_count} voices
         </div>
-        <h1 className="font-sans text-4xl font-semibold tracking-tight text-balance">
+        <h1 className="font-sans text-3xl font-semibold text-espresso text-balance leading-tight">
           {thread.title}
         </h1>
-        <p className="font-sans text-ink-soft text-base leading-relaxed text-balance max-w-xl">
-          {thread.shared_theme}
+        <p className="serif-italic text-espresso-soft text-base leading-relaxed">
+          &ldquo;{thread.shared_theme}&rdquo;
         </p>
-        <div className="font-mono text-[10px] uppercase tracking-caps text-ink-faint pt-1">
-          TRANSMITTING FROM {(thread.countries || []).join(" · ") || "THE WORLD"} · {Math.round(thread.thread_duration_seconds / 60)} MIN
+        <div className="font-sans text-[10px] uppercase tracking-[0.12em] text-espresso-faint">
+          voices from {(thread.countries || []).join(" · ") || "around the world"} · {Math.round(thread.thread_duration_seconds / 60)} min
         </div>
       </header>
 
-      <div className="tape-card">
-        <div className="px-4 py-2 border-b border-ink bg-paper-deep font-mono text-[11px] uppercase tracking-caps">
-          <span className="text-signal">▸</span> CONTINUOUS MIX — ALL VOICES STITCHED WITH AI MUSICAL BRIDGES
+      <article className="cozy-card overflow-hidden">
+        <div className="bg-plum-tint p-4">
+          <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-plum">
+            Continuous mix
+          </div>
         </div>
-        <div className="px-4 py-5">
+        <div className="p-5">
           <audio controls src={thread.thread_audio_url} className="w-full" />
         </div>
-      </div>
+      </article>
 
       <section className="space-y-3">
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
-          THE VOICES
+        <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna px-1">
+          The voices
         </div>
-        <div className="divide-y divide-ink border border-ink">
+        <div className="space-y-2">
           {stories.map((s, i) => (
             <Link
               key={s.id}
               href={`/story/${s.id}`}
-              className="flex items-start gap-4 px-4 py-4 bg-paper-soft hover:bg-paper-deep transition-colors"
+              className="cozy-card flex items-start gap-4 px-4 py-4 hover:bg-cream-soft transition-colors"
             >
-              <span className="font-mono text-[11px] uppercase tracking-caps text-ink-faint pt-1">
-                TRK_{String(i + 1).padStart(2, "0")}
+              <span className="font-sans text-xs text-espresso-faint pt-0.5 tabular-nums">
+                {String(i + 1).padStart(2, "0")}
               </span>
-              <div className="flex-1 space-y-1.5">
-                <div className="font-mono text-[10px] uppercase tracking-caps text-ink-faint flex flex-wrap gap-x-2">
-                  <span className="text-ink font-semibold">{s.username.toUpperCase()}</span>
+              <div className="flex-1 space-y-1.5 min-w-0">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-espresso-faint">
+                  <span className="font-semibold text-espresso">{s.username}</span>
                   <span>·</span>
                   <span>{s.country}</span>
                   <span>·</span>
-                  <span className="text-signal">{s.emotion_primary}</span>
+                  <span className="text-plum font-medium">{s.emotion_primary}</span>
                 </div>
-                <p className="font-sans text-[15px] text-ink leading-relaxed line-clamp-2">
+                <p className="serif-italic text-[14px] text-espresso-soft leading-snug line-clamp-2">
                   &ldquo;{s.emotional_essence}&rdquo;
                 </p>
               </div>

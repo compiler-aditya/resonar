@@ -26,56 +26,55 @@ export default function ProfilePage({ params }: { params: { guestId: string } })
 
   if (isLoading) {
     return (
-      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
-        <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
-        LOADING TRANSMISSIONS…
+      <div className="py-10 text-espresso-faint text-sm flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-sienna soft-pulse" />
+        Loading…
       </div>
     );
   }
-  if (error || !data)
+  if (error || !data) {
     return (
-      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-signal">
-        PROFILE NOT FOUND
-      </div>
+      <div className="py-10 text-rust text-sm">Profile not found.</div>
     );
+  }
 
   return (
-    <div className="py-10 max-w-3xl mx-auto space-y-8">
-      <header className="space-y-1">
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
-          VOICE · PROFILE
+    <div className="py-3 space-y-6">
+      <header className="cozy-card p-5 flex items-center gap-4">
+        <div className="w-14 h-14 rounded-full bg-plum text-cream flex items-center justify-center text-xl font-semibold shrink-0 shadow-cozy-sm">
+          {data.username.slice(0, 1).toUpperCase()}
         </div>
-        <h1 className="font-sans text-3xl font-semibold">{data.username}</h1>
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex flex-wrap gap-x-4 gap-y-1 pt-2 font-mono-tight">
-          <span>{String(data.storyCount).padStart(2, "0")} STORIES</span>
-          <span>·</span>
-          <span>{data.totalListens} LISTENS</span>
-          <span>·</span>
-          <span>{data.totalReactions} REACTIONS</span>
+        <div className="min-w-0 flex-1">
+          <h1 className="font-sans text-xl font-semibold text-espresso truncate">
+            {data.username}
+          </h1>
+          <div className="font-sans text-xs text-espresso-faint mt-1 flex gap-3">
+            <span><b className="font-semibold text-espresso">{data.storyCount}</b> stories</span>
+            <span><b className="font-semibold text-espresso">{data.totalListens}</b> listens</span>
+            <span><b className="font-semibold text-espresso">{data.totalReactions}</b> reactions</span>
+          </div>
         </div>
       </header>
 
-      <section className="tape-card">
-        <div className="px-4 py-2 border-b border-ink bg-paper-deep font-mono text-[11px] uppercase tracking-caps text-ink-faint">
-          EMOTIONAL FINGERPRINT
+      <section className="cozy-card p-5 space-y-3">
+        <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
+          Emotional Fingerprint
         </div>
-        <div className="px-4 py-4">
-          <EmotionalFingerprint data={data.fingerprint || []} />
-        </div>
+        <EmotionalFingerprint data={data.fingerprint || []} />
       </section>
 
-      <section className="space-y-4">
-        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
-          TRANSMISSIONS · {String(data.stories.length).padStart(2, "0")}
+      <section className="space-y-3">
+        <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna px-1">
+          Their stories
         </div>
         {data.stories.length === 0 ? (
-          <div className="border border-tape bg-paper-deep px-6 py-10 text-center font-mono text-[11px] uppercase tracking-caps text-ink-faint">
-            NO TRANSMISSIONS YET
+          <div className="cozy-card p-8 text-center text-espresso-faint text-sm">
+            No stories shared yet.
           </div>
         ) : (
-          <div className="space-y-5">
-            {data.stories.map((s, i) => (
-              <StoryCard key={s.id} story={s} trackNumber={i + 1} />
+          <div className="space-y-4">
+            {data.stories.map((s) => (
+              <StoryCard key={s.id} story={s} />
             ))}
           </div>
         )}

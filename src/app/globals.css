@@ -3,37 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --paper: #f4ecd8;
-  --paper-deep: #ebe1ca;
-  --ink: #1a1815;
-  --ink-soft: #3a3530;
-  --ink-faint: #6b645a;
-  --signal: #d9571e;
-  --olive: #8b9469;
-  --tape: #c9bfa6;
+  --sand: #e9dfc9;
+  --sand-soft: #f0e8d5;
+  --sand-deep: #dfd3b8;
+  --cream: #faf5ea;
+  --espresso: #3d2f28;
+  --espresso-soft: #5c4a42;
+  --espresso-faint: #8a7a6e;
+  --plum: #6b4a5c;
+  --plum-soft: #8a6478;
+  --plum-deep: #4e3342;
+  --plum-tint: #e8dfe2;
+  --olive: #6a7548;
+  --sienna: #c4704a;
 }
 
 html, body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-plex-sans), system-ui, -apple-system, sans-serif;
+  background: var(--sand);
+  color: var(--espresso);
+  font-family: var(--font-sora), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Paper grain — a subtle warm noise that sells the "ink-printed" feel */
-body {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(26, 24, 21, 0.06) 1px, transparent 0);
-  background-size: 3px 3px;
+/* Gentle radial tint in the corners to hint at warmth without looking like a gradient */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(138, 100, 120, 0.10) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(196, 112, 74, 0.06) 0%, transparent 45%);
+  z-index: -1;
 }
 
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-plex-sans), system-ui, sans-serif;
-    color: var(--ink);
+    font-family: var(--font-sora), system-ui, sans-serif;
+    color: var(--espresso);
     letter-spacing: -0.01em;
   }
   button, input, select, textarea {
     font-family: inherit;
+  }
+  input::placeholder, textarea::placeholder {
+    color: var(--espresso-faint);
   }
 }
 
@@ -42,57 +57,36 @@ body {
     text-wrap: balance;
   }
 
-  .font-mono-tight {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
+  .serif-italic {
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-style: italic;
   }
 
-  .ink-rule {
-    border-top: 1px solid var(--ink);
+  .cozy-card {
+    background: var(--cream);
+    border-radius: 22px;
+    box-shadow: 0 6px 20px -8px rgba(61, 47, 40, 0.18);
   }
 
-  .ink-rule-faint {
-    border-top: 1px solid var(--tape);
+  .cozy-card-tint {
+    background: var(--plum-tint);
+    border-radius: 22px;
   }
 
-  .tape-card {
-    background: var(--paper-soft, #faf6e8);
-    border: 1px solid var(--ink);
-    box-shadow: 3px 3px 0 0 var(--ink);
+  @keyframes soft-pulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+  .soft-pulse {
+    animation: soft-pulse 2s ease-in-out infinite;
   }
 
-  .tape-card-faint {
-    background: var(--paper);
-    border: 1px solid var(--tape);
+  /* hide the native audio element — we render custom controls on top */
+  .sr-only-audio {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
   }
-
-  /* VU meter bar animation for the "transmitting" indicator */
-  @keyframes vu-pulse {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 1; }
-  }
-  .vu-pulse {
-    animation: vu-pulse 1.6s ease-in-out infinite;
-  }
-
-  /* Scrolling-tape marquee underline for "live" elements */
-  @keyframes tape-scroll {
-    0% { background-position: 0 0; }
-    100% { background-position: 12px 0; }
-  }
-  .tape-scan {
-    background-image: repeating-linear-gradient(
-      90deg,
-      var(--ink) 0 4px,
-      transparent 4px 8px
-    );
-    background-size: 8px 2px;
-    animation: tape-scroll 0.6s linear infinite;
-  }
-}
-
-/* Audio element baseline — make the native player less ugly on paper */
-audio {
-  filter: sepia(0.12) hue-rotate(-8deg);
-  width: 100%;
 }

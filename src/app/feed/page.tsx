@@ -11,6 +11,13 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 type Tab = "for-you" | "trending" | "new" | "mood";
 
+const TAB_LABELS: Record<Tab, string> = {
+  "for-you": "FOR YOU",
+  trending: "TRENDING",
+  new: "NEW",
+  mood: "BY MOOD",
+};
+
 export default function FeedPage() {
   const [tab, setTab] = useState<Tab>("new");
   const [mood, setMood] = useState<string>(MOOD_KEYS[0]);
@@ -38,34 +45,51 @@ export default function FeedPage() {
   const prompts = promptsData?.prompts?.slice(0, 1) ?? [];
 
   return (
-    <div className="py-6 space-y-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Feed</h1>
+    <div className="py-6 space-y-5">
+      <header className="flex items-end justify-between">
+        <div className="space-y-1">
+          <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+            <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+            LIVE FEED · TRANSMITTING
+          </div>
+          <h1 className="font-sans text-3xl font-semibold">The broadcast</h1>
+        </div>
         <Link
           href="/record"
-          className="text-sm px-4 py-2 bg-white text-black rounded-full font-medium"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-ink text-paper font-mono text-[11px] uppercase tracking-caps hover:bg-signal transition-colors shadow-tape-sm"
         >
-          + Share a story
+          ◉ NEW STORY
         </Link>
       </header>
 
-      <nav className="flex items-center gap-2 text-sm border-b border-white/10 pb-3">
-        <TabButton active={tab === "for-you"} onClick={() => setTab("for-you")}>For You</TabButton>
-        <TabButton active={tab === "trending"} onClick={() => setTab("trending")}>Trending</TabButton>
-        <TabButton active={tab === "new"} onClick={() => setTab("new")}>New</TabButton>
-        <TabButton active={tab === "mood"} onClick={() => setTab("mood")}>By Mood</TabButton>
+      <nav className="border-y border-ink bg-paper-deep">
+        <div className="flex divide-x divide-ink">
+          {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 px-3 py-2.5 font-mono text-[11px] uppercase tracking-caps transition-colors ${
+                tab === t
+                  ? "bg-ink text-paper"
+                  : "text-ink hover:bg-ink/5"
+              }`}
+            >
+              {tab === t ? `[${TAB_LABELS[t]}]` : TAB_LABELS[t]}
+            </button>
+          ))}
+        </div>
       </nav>
 
       {tab === "mood" && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-caps">
           {MOOD_KEYS.map((m) => (
             <button
               key={m}
               onClick={() => setMood(m)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition ${
+              className={`px-3 py-1.5 border border-ink transition-colors ${
                 mood === m
-                  ? "bg-white text-black border-white"
-                  : "border-white/15 text-white/70 hover:bg-white/10"
+                  ? "bg-ink text-paper"
+                  : "bg-paper text-ink hover:bg-ink hover:text-paper"
               }`}
             >
               {m}
@@ -75,9 +99,8 @@ export default function FeedPage() {
       )}
 
       {tab === "for-you" && data?.mode === "trending" && (
-        <div className="text-xs text-white/50 border border-white/10 rounded-lg px-3 py-2">
-          React to a few stories and For You will learn your taste.
-          For now, showing what&apos;s trending.
+        <div className="border border-tape bg-paper-deep px-4 py-2 font-mono text-[10px] uppercase tracking-caps text-ink-faint">
+          REACT TO A FEW STORIES AND FOR YOU WILL LEARN YOUR TASTE. FOR NOW, TRANSMITTING TRENDING.
         </div>
       )}
 
@@ -89,40 +112,39 @@ export default function FeedPage() {
         </div>
       )}
 
-      {isLoading && <div className="text-white/50">Loading…</div>}
-      {error && <div className="text-red-300">Could not load feed.</div>}
+      {isLoading && (
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+          LOADING TRANSMISSIONS…
+        </div>
+      )}
+      {error && (
+        <div className="font-mono text-[11px] uppercase tracking-caps text-signal">
+          SIGNAL LOST — COULD NOT LOAD FEED
+        </div>
+      )}
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {data?.stories?.length ? (
-          data.stories.map((s) => <StoryCard key={s.id} story={s} />)
+          data.stories.map((s, i) => (
+            <StoryCard key={s.id} story={s} trackNumber={i + 1} />
+          ))
         ) : !isLoading ? (
-          <div className="py-16 text-center text-white/50">
-            Nothing here yet.{" "}
-            <Link className="underline" href="/record">Record a story.</Link>
+          <div className="border border-tape bg-paper-deep px-6 py-10 text-center space-y-3">
+            <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+              DEAD AIR · NO TRANSMISSIONS YET
+            </div>
+            <div>
+              <Link
+                href="/record"
+                className="font-mono text-[11px] uppercase tracking-caps text-signal hover:underline"
+              >
+                [ RECORD THE FIRST STORY ▸ ]
+              </Link>
+            </div>
           </div>
         ) : null}
       </div>
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded-full transition ${
-        active ? "bg-white text-black" : "text-white/70 hover:bg-white/10"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

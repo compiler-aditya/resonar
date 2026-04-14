@@ -33,19 +33,34 @@ export default function StoryPage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (isLoading) return <div className="py-10 text-white/50">Loading…</div>;
-  if (error || !data?.story)
-    return <div className="py-10 text-red-300">Could not load story.</div>;
+  if (isLoading) {
+    return (
+      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+        <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+        TUNING IN…
+      </div>
+    );
+  }
+  if (error || !data?.story) {
+    return (
+      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-signal">
+        SIGNAL LOST — COULD NOT LOAD STORY
+      </div>
+    );
+  }
 
   return (
-    <div className="py-10 max-w-2xl mx-auto space-y-4">
+    <div className="py-10 max-w-2xl mx-auto space-y-5">
+      <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+        SINGLE TRANSMISSION
+      </div>
       <StoryCard story={data.story} />
       <div className="flex justify-end">
         <button
           onClick={share}
-          className="text-xs px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80"
+          className="inline-flex items-center gap-2 px-4 py-2 border border-ink font-mono text-[11px] uppercase tracking-caps text-ink hover:bg-ink hover:text-paper transition-colors"
         >
-          {copied ? "Link copied ✓" : "Share"}
+          {copied ? "◉ LINK COPIED" : "[ SHARE ]"}
         </button>
       </div>
     </div>

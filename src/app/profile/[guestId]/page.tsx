@@ -24,41 +24,58 @@ export default function ProfilePage({ params }: { params: { guestId: string } })
     fetcher,
   );
 
-  if (isLoading) return <div className="py-10 text-white/50">Loading…</div>;
+  if (isLoading) {
+    return (
+      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+        <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+        LOADING TRANSMISSIONS…
+      </div>
+    );
+  }
   if (error || !data)
-    return <div className="py-10 text-red-300">Profile not found.</div>;
+    return (
+      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-signal">
+        PROFILE NOT FOUND
+      </div>
+    );
 
   return (
     <div className="py-10 max-w-3xl mx-auto space-y-8">
-      <header className="space-y-2">
-        <p className="text-xs uppercase tracking-widest text-white/40">Profile</p>
-        <h1 className="text-3xl font-semibold">{data.username}</h1>
-        <div className="flex gap-4 text-sm text-white/60">
-          <span>{data.storyCount} stories</span>
+      <header className="space-y-1">
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+          VOICE · PROFILE
+        </div>
+        <h1 className="font-sans text-3xl font-semibold">{data.username}</h1>
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex flex-wrap gap-x-4 gap-y-1 pt-2 font-mono-tight">
+          <span>{String(data.storyCount).padStart(2, "0")} STORIES</span>
           <span>·</span>
-          <span>{data.totalListens} listens</span>
+          <span>{data.totalListens} LISTENS</span>
           <span>·</span>
-          <span>{data.totalReactions} reactions</span>
+          <span>{data.totalReactions} REACTIONS</span>
         </div>
       </header>
 
-      <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 space-y-2">
-        <h2 className="text-sm uppercase tracking-widest text-white/40">
-          Emotional Fingerprint
-        </h2>
-        <EmotionalFingerprint data={data.fingerprint || []} />
+      <section className="tape-card">
+        <div className="px-4 py-2 border-b border-ink bg-paper-deep font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+          EMOTIONAL FINGERPRINT
+        </div>
+        <div className="px-4 py-4">
+          <EmotionalFingerprint data={data.fingerprint || []} />
+        </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-widest text-white/40">Stories</h2>
+      <section className="space-y-4">
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+          TRANSMISSIONS · {String(data.stories.length).padStart(2, "0")}
+        </div>
         {data.stories.length === 0 ? (
-          <div className="text-white/50 text-sm py-6 text-center">
-            No stories shared yet.
+          <div className="border border-tape bg-paper-deep px-6 py-10 text-center font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+            NO TRANSMISSIONS YET
           </div>
         ) : (
-          <div className="space-y-4">
-            {data.stories.map((s) => (
-              <StoryCard key={s.id} story={s} />
+          <div className="space-y-5">
+            {data.stories.map((s, i) => (
+              <StoryCard key={s.id} story={s} trackNumber={i + 1} />
             ))}
           </div>
         )}

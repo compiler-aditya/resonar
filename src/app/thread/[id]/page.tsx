@@ -26,65 +26,74 @@ export default function ThreadPage({ params }: { params: { id: string } }) {
     stories: StoryCardData[];
   }>(`/api/threads/${params.id}`, fetcher, { refreshInterval: 0 });
 
-  if (isLoading) return <div className="py-10 text-white/50">Loading…</div>;
+  if (isLoading) {
+    return (
+      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+        <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+        TUNING IN…
+      </div>
+    );
+  }
   if (error || !data?.thread)
-    return <div className="py-10 text-red-300">Thread not found.</div>;
+    return (
+      <div className="py-10 font-mono text-[11px] uppercase tracking-caps text-signal">
+        SIGNAL LOST — THREAD NOT FOUND
+      </div>
+    );
 
   const { thread, stories } = data;
 
   return (
     <div className="py-10 max-w-3xl mx-auto space-y-8">
-      <header className="space-y-3">
-        <p className="text-xs uppercase tracking-widest text-white/40">
-          Resonance Thread
-        </p>
-        <h1 className="text-4xl font-semibold tracking-tight text-balance">
+      <header className="space-y-1">
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+          RESONANCE THREAD · {thread.story_count} VOICES
+        </div>
+        <h1 className="font-sans text-4xl font-semibold tracking-tight text-balance">
           {thread.title}
         </h1>
-        <p className="text-white/70 text-balance">{thread.shared_theme}</p>
-        <div className="flex items-center gap-3 text-xs text-white/50">
-          <span>{thread.story_count} voices</span>
-          <span>·</span>
-          <span>{(thread.countries || []).join(" · ") || "—"}</span>
-          <span>·</span>
-          <span>{Math.round(thread.thread_duration_seconds / 60)} min</span>
+        <p className="font-sans text-ink-soft text-base leading-relaxed text-balance max-w-xl">
+          {thread.shared_theme}
+        </p>
+        <div className="font-mono text-[10px] uppercase tracking-caps text-ink-faint pt-1">
+          TRANSMITTING FROM {(thread.countries || []).join(" · ") || "THE WORLD"} · {Math.round(thread.thread_duration_seconds / 60)} MIN
         </div>
       </header>
 
-      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
-        <audio controls src={thread.thread_audio_url} className="w-full" />
-        <p className="text-xs text-white/50">
-          Continuous mix: all voices stitched together with AI-generated
-          musical bridges.
-        </p>
+      <div className="tape-card">
+        <div className="px-4 py-2 border-b border-ink bg-paper-deep font-mono text-[11px] uppercase tracking-caps">
+          <span className="text-signal">▸</span> CONTINUOUS MIX — ALL VOICES STITCHED WITH AI MUSICAL BRIDGES
+        </div>
+        <div className="px-4 py-5">
+          <audio controls src={thread.thread_audio_url} className="w-full" />
+        </div>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm uppercase tracking-widest text-white/40">
-          The voices
-        </h2>
-        <div className="space-y-2">
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint">
+          THE VOICES
+        </div>
+        <div className="divide-y divide-ink border border-ink">
           {stories.map((s, i) => (
             <Link
               key={s.id}
               href={`/story/${s.id}`}
-              className="flex items-start gap-3 rounded-2xl border border-white/10 p-4 hover:bg-white/5 transition"
+              className="flex items-start gap-4 px-4 py-4 bg-paper-soft hover:bg-paper-deep transition-colors"
             >
-              <span className="text-white/30 tabular-nums text-xs pt-0.5">
-                {String(i + 1).padStart(2, "0")}
+              <span className="font-mono text-[11px] uppercase tracking-caps text-ink-faint pt-1">
+                TRK_{String(i + 1).padStart(2, "0")}
               </span>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2 text-xs text-white/60">
-                  <span className="text-white/90 font-medium">{s.username}</span>
+              <div className="flex-1 space-y-1.5">
+                <div className="font-mono text-[10px] uppercase tracking-caps text-ink-faint flex flex-wrap gap-x-2">
+                  <span className="text-ink font-semibold">{s.username.toUpperCase()}</span>
                   <span>·</span>
                   <span>{s.country}</span>
                   <span>·</span>
-                  <span className="uppercase tracking-wide">
-                    {s.emotion_primary}
-                  </span>
+                  <span className="text-signal">{s.emotion_primary}</span>
                 </div>
-                <p className="text-sm text-white/80 line-clamp-2">
-                  {s.emotional_essence}
+                <p className="font-sans text-[15px] text-ink leading-relaxed line-clamp-2">
+                  &ldquo;{s.emotional_essence}&rdquo;
                 </p>
               </div>
             </Link>

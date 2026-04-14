@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
+import ReactionBar from "./ReactionBar";
 
 export interface StoryCardData {
   id: string;
@@ -106,7 +107,7 @@ export default function StoryCard({ story }: { story: StoryCardData }) {
 
       <audio ref={audioRef} src={src} preload="none" controls className="w-full" />
 
-      <div className="flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between text-xs gap-2">
         <div className="flex gap-2">
           <button
             onClick={() => setMode("raw")}
@@ -135,11 +136,19 @@ export default function StoryCard({ story }: { story: StoryCardData }) {
             )}
           </button>
         </div>
-        <div className="flex gap-3 text-white/50">
-          <span>♡ {live.react_felt_this}</span>
-          <span>🎧 {live.total_listens}</span>
-        </div>
+        <div className="text-white/40 tabular-nums">🎧 {live.total_listens}</div>
       </div>
+
+      <ReactionBar
+        storyId={live.id}
+        initial={{
+          felt_this: live.react_felt_this,
+          laughed: live.react_laughed,
+          chills: live.react_chills,
+          me_too: live.react_me_too,
+          hugged: live.react_hugged,
+        }}
+      />
     </article>
   );
 }

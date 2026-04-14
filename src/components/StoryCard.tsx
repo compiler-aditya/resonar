@@ -117,7 +117,7 @@ export default function StoryCard({ story }: { story: StoryCardData }) {
         ))}
       </div>
 
-      <audio ref={audioRef} src={src} preload="none" controls className="w-full" />
+      <audio ref={audioRef} src={src} preload="metadata" controls className="w-full" />
 
       <div className="flex items-center justify-between text-xs gap-2">
         <div className="flex gap-2">

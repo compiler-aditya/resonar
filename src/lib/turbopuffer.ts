@@ -376,6 +376,24 @@ export async function listActiveWhisperPrompts(limit = 5): Promise<WhisperPrompt
   return (res.rows ?? []).map((r) => r as unknown as WhisperPromptRow);
 }
 
+let warmPromise: Promise<void> | null = null;
+
+export function warmAllCaches(): Promise<void> {
+  if (warmPromise) return warmPromise;
+  warmPromise = (async () => {
+    const namespaces = [STORIES_NS, THREADS_NS, REACTIONS_NS, WHISPERS_NS];
+    await Promise.allSettled(
+      namespaces.map((name) =>
+        tpuf.namespace(name).hintCacheWarm().catch((err: unknown) => {
+          console.warn(`[turbopuffer] warm ${name} failed`, err);
+        }),
+      ),
+    );
+    console.log("[turbopuffer] caches warmed");
+  })();
+  return warmPromise;
+}
+
 export async function warmStoriesCache() {
   try {
     await storiesNs().hintCacheWarm();

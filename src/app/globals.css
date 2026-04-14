@@ -21,9 +21,12 @@
 html, body {
   background: var(--sand);
   color: var(--espresso);
-  font-family: var(--font-sora), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sora), system-ui, -apple-system, "Segoe UI",
+    "Noto Sans", "Noto Sans Arabic", "Noto Sans Devanagari", "Noto Sans CJK SC",
+    "Noto Sans JP", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Gentle radial tint in the corners to hint at warmth without looking like a gradient */
@@ -58,7 +61,9 @@ body::before {
   }
 
   .serif-italic {
-    font-family: var(--font-newsreader), Georgia, serif;
+    font-family: var(--font-newsreader), Georgia, Cambria, "Noto Serif",
+      "Noto Naskh Arabic", "Noto Serif Devanagari", "Noto Serif CJK SC",
+      "Noto Serif JP", serif;
     font-style: italic;
   }
 

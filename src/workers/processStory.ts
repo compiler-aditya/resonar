@@ -18,8 +18,10 @@ export async function processStoryJob(data: ProcessStoryJobData): Promise<string
   const transcription = await transcribeAudio(audio, "audio/webm");
   const transcript = transcription.text || "";
   const actualDuration = transcription.durationSeconds || durationSeconds || 30;
+  const detectedLanguage = transcription.languageCode || "en";
+  console.log(`[processStory ${storyId}] transcribed (${detectedLanguage}): ${transcript.slice(0, 80)}…`);
 
-  const analysis = await analyzeStory(transcript, actualDuration);
+  const analysis = await analyzeStory(transcript, actualDuration, detectedLanguage);
   const vector = await embed(analysis.emotional_essence || transcript.slice(0, 400));
 
   const now = new Date().toISOString();
@@ -39,7 +41,7 @@ export async function processStoryJob(data: ProcessStoryJobData): Promise<string
     guest_id: guestId,
     username,
     country: "IN",
-    language: transcription.languageCode || "en",
+    language: detectedLanguage,
     react_felt_this: 0,
     react_laughed: 0,
     react_chills: 0,

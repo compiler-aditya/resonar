@@ -51,7 +51,7 @@ export default function ThreadPage({ params }: { params: { id: string } }) {
         <h1 className="font-sans text-3xl font-semibold text-espresso text-balance leading-tight">
           {thread.title}
         </h1>
-        <p className="serif-italic text-espresso-soft text-base leading-relaxed">
+        <p dir="auto" className="serif-italic text-espresso-soft text-base leading-relaxed">
           &ldquo;{thread.shared_theme}&rdquo;
         </p>
         <div className="font-sans text-[10px] uppercase tracking-[0.12em] text-espresso-faint">
@@ -92,7 +92,11 @@ export default function ThreadPage({ params }: { params: { id: string } }) {
                   <span>·</span>
                   <span className="text-plum font-medium">{s.emotion_primary}</span>
                 </div>
-                <p className="serif-italic text-[14px] text-espresso-soft leading-snug line-clamp-2">
+                <p
+                  dir="auto"
+                  lang={s.language || undefined}
+                  className="serif-italic text-[14px] text-espresso-soft leading-snug line-clamp-2"
+                >
                   &ldquo;{s.emotional_essence}&rdquo;
                 </p>
               </div>

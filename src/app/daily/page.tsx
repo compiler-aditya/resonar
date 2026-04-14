@@ -54,7 +54,7 @@ export default function DailyPage() {
             <h2 className="font-sans text-2xl font-semibold text-espresso leading-snug">
               {data.episode.title}
             </h2>
-            <p className="serif-italic text-espresso-soft text-base leading-relaxed">
+            <p dir="auto" className="serif-italic text-espresso-soft text-base leading-relaxed">
               &ldquo;{data.episode.shared_theme}&rdquo;
             </p>
             {data.episode.countries?.length ? (

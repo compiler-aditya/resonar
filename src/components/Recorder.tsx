@@ -168,7 +168,8 @@ export default function Recorder() {
           {promptId ? "Answer the whisper" : "Share a voice story"}
         </h1>
         <p className="font-sans text-sm text-espresso-soft max-w-md">
-          Up to {maxSeconds}s. AI will wrap it in matching music and ambient
+          Up to {maxSeconds}s, in any language you speak. AI will detect the
+          language, transcribe it, and wrap it in matching music and ambient
           sound after you publish.
         </p>
       </header>

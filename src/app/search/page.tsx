@@ -38,6 +38,7 @@ export default function SearchPage() {
         <SearchIcon className="w-5 h-5 text-espresso-faint shrink-0" />
         <input
           autoFocus
+          dir="auto"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="try “what home sounds like”"

@@ -24,26 +24,34 @@ export interface StoryAnalysis {
 }
 
 const STORY_ANALYSIS_PROMPT = `You are an audio producer analyzing a voice note for an audio social platform.
+Voice notes can come in ANY language — Spanish, Hindi, Arabic, Mandarin, French, Japanese, Portuguese, etc.
 Analyze the transcript and generate both emotional metadata AND audio production prompts.
 
 TRANSCRIPT:
 "{transcript}"
 
+DETECTED LANGUAGE CODE: {language}
 STORY DURATION: {duration} seconds
 
 Return ONLY valid JSON (no markdown, no backticks):
 {
-  "emotion_primary": "single word — the dominant emotion (e.g. loneliness, joy, anger, nostalgia, grief, excitement, anxiety, gratitude, defiance, tenderness)",
-  "emotion_secondary": "single word — the undertone emotion",
+  "emotion_primary": "<single ENGLISH word from this fixed taxonomy: joy, loneliness, anger, nostalgia, grief, excitement, anxiety, gratitude, defiance, tenderness, hope, fear, awe, shame, pride, longing, contentment, love. ALWAYS English regardless of transcript language so the UI can colour the chip.>",
+  "emotion_secondary": "<single ENGLISH word from the same taxonomy — the undertone>",
   "intensity": <1-10 integer — how emotionally charged is this>,
   "valence": <-1.0 to 1.0 float — negative=dark/heavy, positive=bright/light>,
-  "themes": ["tag1", "tag2", "tag3"],
-  "emotional_essence": "2-3 sentences capturing what this story is REALLY about emotionally. Used for semantic search — write it as the emotional truth, not a summary.",
-  "music_prompt": "<MAX 50 WORDS. Instrumental background music that fits THIS specific story. Include: genre/style, tempo (BPM), key/mode, primary instruments, energy level, emotional arc. Must be instrumental only. Do NOT mention any artist or band names. Example: 'Gentle fingerpicked acoustic guitar in A minor, 68 BPM, with soft sustained cello underneath, slowly building warmth, bittersweet and intimate like a late-night kitchen conversation'>",
-  "sfx_prompt": "<MAX 30 WORDS. Ambient environmental sounds that place the listener in the world of THIS story. Be specific to the setting and mood. Example: 'Soft rain on a tin roof, distant thunder, kettle whistling, old wooden chair creaking'>",
+  "themes": ["short English tag", "short English tag", "short English tag"],
+  "emotional_essence": "<2-3 sentences in the ORIGINAL transcript language ({language}). If the transcript is Spanish, write Spanish. If Hindi, write Hindi. If Arabic, write Arabic. NEVER translate to English. Capture what this story is REALLY about emotionally — the emotional truth, not a literal summary. This is what listeners will read on the story card, so it must feel native to the speaker.>",
+  "music_prompt": "<MAX 50 WORDS. ALWAYS in English regardless of transcript language — ElevenLabs Music API performs best with English prompts. Instrumental background music that fits THIS specific story. Include: genre/style, tempo (BPM), key/mode, primary instruments, energy level, emotional arc. Must be instrumental only. Do NOT mention any artist or band names. Example: 'Gentle fingerpicked acoustic guitar in A minor, 68 BPM, with soft sustained cello underneath, slowly building warmth, bittersweet and intimate like a late-night kitchen conversation'>",
+  "sfx_prompt": "<MAX 30 WORDS. ALWAYS in English. Ambient environmental sounds that place the listener in the world of THIS story. Be specific to the setting and mood. Example: 'Soft rain on a tin roof, distant thunder, kettle whistling, old wooden chair creaking'>",
   "music_volume": <0.10-0.25 float — lower for intense/quiet stories, higher for energetic ones>,
   "sfx_volume": <0.05-0.15 float — subtle, never overpowering the voice>
 }
+
+LANGUAGE RULES (CRITICAL):
+- emotion_primary, emotion_secondary, themes: ALWAYS English (single words) so the UI taxonomy works
+- emotional_essence: SAME language as the transcript — preserve the speaker's voice, never translate
+- music_prompt, sfx_prompt: ALWAYS English so ElevenLabs Music + SFX APIs render correctly
+- If the speaker references a culturally specific place or instrument (sitar, koto, accordion, oud, mariachi, taiko, gamelan, etc.), include it in the music/sfx prompt for authenticity
 
 RULES FOR AUDIO PROMPTS:
 - music_prompt must be specific to THIS story's content and setting, not generic mood music
@@ -79,6 +87,7 @@ function parseJsonWithRepair<T>(text: string): T {
 export async function analyzeStory(
   transcript: string,
   durationSeconds: number,
+  languageCode = "auto",
 ): Promise<StoryAnalysis> {
   const model = genai.getGenerativeModel({
     model: FLASH_MODEL,
@@ -86,6 +95,7 @@ export async function analyzeStory(
   });
   const prompt = STORY_ANALYSIS_PROMPT
     .replace("{transcript}", transcript.replace(/"/g, '\\"'))
+    .replace(/\{language\}/g, languageCode)
     .replace("{duration}", String(Math.round(durationSeconds)));
   const res = await model.generateContent(prompt);
   const text = res.response.text();

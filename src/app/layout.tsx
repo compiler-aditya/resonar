@@ -10,18 +10,39 @@ import { MicIcon } from "@/components/Icons";
 import "./globals.css";
 
 const sora = Sora({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-sora",
   display: "swap",
+  fallback: [
+    "system-ui",
+    "-apple-system",
+    "Segoe UI",
+    "Noto Sans",
+    "Noto Sans Arabic",
+    "Noto Sans Devanagari",
+    "Noto Sans CJK SC",
+    "Noto Sans JP",
+    "sans-serif",
+  ],
 });
 
 const newsreader = Newsreader({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600"],
   style: ["italic", "normal"],
   variable: "--font-newsreader",
   display: "swap",
+  fallback: [
+    "Georgia",
+    "Cambria",
+    "Noto Serif",
+    "Noto Naskh Arabic",
+    "Noto Serif Devanagari",
+    "Noto Serif CJK SC",
+    "Noto Serif JP",
+    "serif",
+  ],
 });
 
 export const metadata: Metadata = {

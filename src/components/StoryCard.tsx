@@ -12,6 +12,7 @@ export interface StoryCardData {
   guest_id?: string;
   username: string;
   country: string;
+  language?: string;
   emotion_primary: string;
   emotion_secondary: string;
   emotion_intensity: number;
@@ -139,8 +140,12 @@ export default function StoryCard({ story }: StoryCardProps) {
         </div>
       </header>
 
-      {/* Essence — the pull-quote */}
-      <p className="serif-italic text-espresso text-[17px] sm:text-[18px] leading-[1.55] pr-1">
+      {/* Essence — the pull-quote, dir=auto so RTL languages flow correctly */}
+      <p
+        dir="auto"
+        lang={live.language || undefined}
+        className="serif-italic text-espresso text-[17px] sm:text-[18px] leading-[1.55] pr-1"
+      >
         &ldquo;{live.emotional_essence || "…"}&rdquo;
       </p>
 

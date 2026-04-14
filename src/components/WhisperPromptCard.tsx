@@ -39,7 +39,10 @@ export default function WhisperPromptCard({ prompt }: { prompt: WhisperPrompt })
         A Whisper Prompt
       </div>
 
-      <p className="serif-italic text-espresso text-[20px] leading-[1.4] relative">
+      <p
+        dir="auto"
+        className="serif-italic text-espresso text-[20px] leading-[1.4] relative"
+      >
         &ldquo;{prompt.prompt_text}&rdquo;
       </p>
 

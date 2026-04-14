@@ -14,7 +14,7 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed bottom-0 inset-x-0 z-40 pointer-events-none"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-40 pointer-events-none"
     >
       <div className="pointer-events-auto max-w-md mx-auto mb-3 px-4">
         <div className="relative bg-cream/95 backdrop-blur-sm rounded-[28px] shadow-cozy-lg border border-espresso/5">

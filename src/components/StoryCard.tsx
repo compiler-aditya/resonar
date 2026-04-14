@@ -117,12 +117,12 @@ export default function StoryCard({ story }: StoryCardProps) {
             {live.guest_id ? (
               <Link
                 href={`/profile/${live.guest_id}`}
-                className="font-sans font-semibold text-espresso text-[14px] hover:text-plum transition-colors min-w-0 truncate"
+                className="font-sans font-semibold text-espresso text-[13px] sm:text-[14px] hover:text-plum transition-colors min-w-0 truncate"
               >
                 {live.username}
               </Link>
             ) : (
-              <div className="font-sans font-semibold text-espresso text-[14px] truncate">
+              <div className="font-sans font-semibold text-espresso text-[13px] sm:text-[14px] truncate">
                 {live.username}
               </div>
             )}
@@ -218,7 +218,7 @@ function EmotionChip({
 }) {
   return (
     <span
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 font-sans text-[9px] font-bold uppercase tracking-[0.12em]"
+      className="inline-flex items-center rounded-full px-2 py-0.5 font-sans text-[9px] font-bold uppercase tracking-[0.1em]"
       style={{ background: style.bg, color: style.fg }}
     >
       {label}

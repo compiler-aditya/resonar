@@ -3,17 +3,17 @@ import { MicIcon } from "@/components/Icons";
 
 export default function LandingPage() {
   return (
-    <div className="py-6 space-y-8">
-      <section className="space-y-4">
-        <h1 className="font-sans text-[40px] sm:text-6xl font-semibold leading-[1.05] tracking-tight text-balance">
+    <div className="py-6 lg:py-10 space-y-10 lg:space-y-14">
+      <section className="space-y-5">
+        <h1 className="font-sans text-[40px] sm:text-6xl lg:text-7xl font-semibold leading-[1.05] tracking-tight text-balance">
           Stories,
           <br />
           <span className="serif-italic font-normal text-plum">wrapped warm.</span>
         </h1>
-        <p className="font-sans text-base text-espresso-soft leading-relaxed max-w-md">
+        <p className="font-sans text-base lg:text-lg text-espresso-soft leading-relaxed max-w-xl">
           Share a real voice story. AI wraps it in mood-matched music and
           ambient sound. Turbopuffer semantically connects strangers who feel
-          the same thing.
+          the same thing — and stitches them into a single continuous broadcast.
         </p>
         <div className="flex gap-2 pt-2">
           <Link
@@ -32,7 +32,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="grid gap-3 sm:gap-4 sm:grid-cols-3">
         <FeatureCard
           badge="atmosphere, live"
           title="Every story becomes a mood."
@@ -48,6 +48,20 @@ export default function LandingPage() {
           title="The world's mood, narrated."
           body="Each day, an AI narrator produces a 5-minute episode of the collective mood — real voices, original music, emotions mapped."
         />
+      </section>
+
+      <section className="hidden lg:block cozy-card-tint p-6 space-y-3">
+        <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
+          The stack
+        </div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-espresso-soft">
+          <div><b className="text-espresso font-semibold">turbopuffer</b> · vector + BM25 + aggregations</div>
+          <div><b className="text-espresso font-semibold">ElevenLabs</b> · STT, TTS, Music, SFX</div>
+          <div><b className="text-espresso font-semibold">Gemini 2.0 Flash</b> · single-call analysis</div>
+          <div><b className="text-espresso font-semibold">text-embedding-004</b> · 768-d cosine</div>
+          <div><b className="text-espresso font-semibold">FFmpeg</b> · server-side mixing</div>
+          <div><b className="text-espresso font-semibold">Cloud Run + R2</b> · single Dockerfile</div>
+        </div>
       </section>
     </div>
   );

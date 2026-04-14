@@ -88,9 +88,12 @@ export default function FeedPage() {
         </div>
       )}
 
-      {prompts.length > 0 && prompts.map((p) => (
-        <WhisperPromptCard key={p.id} prompt={p} />
-      ))}
+      {/* Whisper prompt shows in the feed on mobile; on lg it lives in the right rail */}
+      <div className="lg:hidden space-y-3">
+        {prompts.length > 0 && prompts.map((p) => (
+          <WhisperPromptCard key={p.id} prompt={p} />
+        ))}
+      </div>
 
       {isLoading && (
         <div className="text-espresso-faint text-sm flex items-center gap-2">

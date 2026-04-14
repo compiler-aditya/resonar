@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const DURATIONS = [30, 60, 120, 180] as const;
 
 export default function Recorder() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const promptId = searchParams.get("prompt");
   const [maxSeconds, setMaxSeconds] = useState<number>(60);
   const [phase, setPhase] = useState<"idle" | "recording" | "preview" | "publishing" | "error">("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -133,6 +135,7 @@ export default function Recorder() {
       const form = new FormData();
       form.append("audio", blob, "story.webm");
       form.append("duration_seconds", String(elapsed || maxSeconds));
+      if (promptId) form.append("prompt_id", promptId);
       const res = await fetch("/api/stories", { method: "POST", body: form });
       if (!res.ok) throw new Error(await res.text());
       router.push("/feed");
@@ -154,7 +157,9 @@ export default function Recorder() {
   return (
     <div className="max-w-xl mx-auto py-10 space-y-8">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-semibold">Share a voice story</h1>
+        <h1 className="text-3xl font-semibold">
+          {promptId ? "Respond to a whisper" : "Share a voice story"}
+        </h1>
         <p className="text-white/60 text-sm">
           Up to {maxSeconds}s. AI will wrap it in matching music and ambient sound.
         </p>

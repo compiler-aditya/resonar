@@ -4,6 +4,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import { useState } from "react";
 import StoryCard, { type StoryCardData } from "@/components/StoryCard";
+import WhisperPromptCard, { type WhisperPrompt } from "@/components/WhisperPromptCard";
 import { MOOD_KEYS } from "@/lib/moods";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -28,6 +29,13 @@ export default function FeedPage() {
     fetcher,
     { refreshInterval: 8000 },
   );
+
+  const { data: promptsData } = useSWR<{ prompts: WhisperPrompt[] }>(
+    "/api/prompts",
+    fetcher,
+    { refreshInterval: 0 },
+  );
+  const prompts = promptsData?.prompts?.slice(0, 1) ?? [];
 
   return (
     <div className="py-6 space-y-6">
@@ -70,6 +78,14 @@ export default function FeedPage() {
         <div className="text-xs text-white/50 border border-white/10 rounded-lg px-3 py-2">
           React to a few stories and For You will learn your taste.
           For now, showing what&apos;s trending.
+        </div>
+      )}
+
+      {prompts.length > 0 && (
+        <div className="space-y-3">
+          {prompts.map((p) => (
+            <WhisperPromptCard key={p.id} prompt={p} />
+          ))}
         </div>
       )}
 

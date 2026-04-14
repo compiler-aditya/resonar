@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "init-namespaces": "tsx --env-file=.env.local src/scripts/init-namespaces.ts",
     "debug-query": "tsx --env-file=.env.local src/scripts/debug-query.ts",
-    "seed-reactions": "tsx --env-file=.env.local src/scripts/seed-reactions.ts"
+    "seed-reactions": "tsx --env-file=.env.local src/scripts/seed-reactions.ts",
+    "seed-stories": "tsx --env-file=.env.local src/scripts/seed-stories.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1030.0",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
 import StoryCard, { type StoryCardData } from "@/components/StoryCard";
 
@@ -11,14 +12,42 @@ export default function StoryPage({ params }: { params: { id: string } }) {
     fetcher,
     { refreshInterval: 5000 },
   );
+  const [copied, setCopied] = useState(false);
+
+  const share = async () => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    try {
+      const nav = window.navigator as Navigator & {
+        share?: (d: { url: string; title: string }) => Promise<void>;
+      };
+      if (typeof nav.share === "function") {
+        await nav.share({ url, title: "A voice story on Resonar" });
+      } else {
+        await nav.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }
+    } catch {
+      // user cancelled share sheet
+    }
+  };
 
   if (isLoading) return <div className="py-10 text-white/50">Loading…</div>;
   if (error || !data?.story)
     return <div className="py-10 text-red-300">Could not load story.</div>;
 
   return (
-    <div className="py-10 max-w-2xl mx-auto">
+    <div className="py-10 max-w-2xl mx-auto space-y-4">
       <StoryCard story={data.story} />
+      <div className="flex justify-end">
+        <button
+          onClick={share}
+          className="text-xs px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80"
+        >
+          {copied ? "Link copied ✓" : "Share"}
+        </button>
+      </div>
     </div>
   );
 }

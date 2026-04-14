@@ -4,12 +4,12 @@ import { useCallback, useRef, useState } from "react";
 
 export type ReactionType = "felt_this" | "laughed" | "chills" | "me_too" | "hugged";
 
-const REACTIONS: Array<{ type: ReactionType; emoji: string; label: string }> = [
-  { type: "felt_this", emoji: "♡", label: "Felt this" },
-  { type: "laughed", emoji: "😂", label: "Laughed" },
-  { type: "chills", emoji: "❄", label: "Chills" },
-  { type: "me_too", emoji: "🤝", label: "Me too" },
-  { type: "hugged", emoji: "🫂", label: "Hugged" },
+const REACTIONS: Array<{ type: ReactionType; glyph: string; label: string }> = [
+  { type: "felt_this", glyph: "♡", label: "FELT" },
+  { type: "laughed", glyph: "笑", label: "LAUGH" },
+  { type: "chills", glyph: "❄", label: "CHILLS" },
+  { type: "me_too", glyph: "⧗", label: "ME-TOO" },
+  { type: "hugged", glyph: "◉", label: "HUG" },
 ];
 
 export interface ReactionCounts {
@@ -60,29 +60,31 @@ export default function ReactionBar({
         setCounts((c) => ({ ...c, [type]: Math.max(0, c[type] - 1) }));
       } finally {
         setPending(null);
-        setTimeout(() => setClicked(null), 600);
+        setTimeout(() => setClicked(null), 500);
       }
     },
     [storyId, pending, play],
   );
 
   return (
-    <div className="flex items-center gap-1 flex-wrap">
-      {REACTIONS.map((r) => {
+    <div className="grid grid-cols-5 border border-ink font-mono text-[10px] uppercase tracking-caps font-mono-tight">
+      {REACTIONS.map((r, i) => {
         const isClicked = clicked === r.type;
         return (
           <button
             key={r.type}
             onClick={() => react(r.type)}
-            className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-1.5 transition-colors ${
+              i > 0 ? "border-l border-ink" : ""
+            } ${
               isClicked
-                ? "bg-white/20 border-white/40 scale-110"
-                : "border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20"
+                ? "bg-signal text-paper"
+                : "bg-paper text-ink hover:bg-ink hover:text-paper"
             }`}
             aria-label={r.label}
           >
-            <span>{r.emoji}</span>
-            <span className="tabular-nums">{counts[r.type]}</span>
+            <span className="text-[11px]">{r.glyph}</span>
+            <span className="tabular-nums">{String(counts[r.type]).padStart(2, "0")}</span>
           </button>
         );
       })}

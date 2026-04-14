@@ -30,29 +30,33 @@ export default function WhisperPromptCard({ prompt }: { prompt: WhisperPrompt })
   };
 
   return (
-    <article className="rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/5 p-5 space-y-3">
-      <div className="flex items-center gap-2 text-xs text-fuchsia-300 uppercase tracking-widest">
-        <span>◌ Whisper Prompt</span>
-        <span className="text-white/40 normal-case tracking-normal">
-          {prompt.target_emotion}
-        </span>
+    <article className="border border-ink bg-paper-deep shadow-tape-sm">
+      <div className="px-4 py-2 border-b border-ink flex items-center justify-between font-mono text-[11px] uppercase tracking-caps">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+          <span className="text-signal font-semibold">WHISPER PROMPT</span>
+        </div>
+        <span className="text-ink-faint">TARGET · {prompt.target_emotion.toUpperCase()}</span>
       </div>
-      <p className="text-white text-lg leading-relaxed text-balance">
-        {prompt.prompt_text}
-      </p>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={toggle}
-          className="text-xs px-3 py-1.5 rounded-full border border-white/15 text-white/80 hover:bg-white/10"
-        >
-          {playing ? "Pause" : "▶ Listen"}
-        </button>
-        <Link
-          href={`/record?prompt=${prompt.id}`}
-          className="text-xs px-4 py-1.5 rounded-full bg-white text-black font-medium hover:bg-white/90"
-        >
-          Respond with a voice note
-        </Link>
+      <div className="px-5 py-5 space-y-4">
+        <p className="font-sans text-[19px] text-ink leading-relaxed">
+          &ldquo;{prompt.prompt_text}&rdquo;
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggle}
+            className="inline-flex items-center justify-center w-8 h-8 border border-ink bg-paper hover:bg-signal hover:text-paper transition-colors font-mono text-sm"
+            aria-label={playing ? "Pause" : "Play prompt"}
+          >
+            {playing ? "◼" : "▸"}
+          </button>
+          <Link
+            href={`/record?prompt=${prompt.id}`}
+            className="ml-auto inline-flex items-center gap-2 px-4 py-2 bg-ink text-paper font-mono text-[11px] uppercase tracking-caps hover:bg-signal transition-colors"
+          >
+            ◉ RESPOND WITH A VOICE NOTE
+          </Link>
+        </div>
       </div>
     </article>
   );

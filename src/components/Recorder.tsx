@@ -9,6 +9,7 @@ export default function Recorder() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const promptId = searchParams.get("prompt");
+
   const [maxSeconds, setMaxSeconds] = useState<number>(60);
   const [phase, setPhase] = useState<"idle" | "recording" | "preview" | "publishing" | "error">("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -85,7 +86,7 @@ export default function Recorder() {
       }, 1000);
     } catch (err) {
       console.error(err);
-      setError((err as Error).message || "Could not access microphone");
+      setError((err as Error).message || "COULD NOT ACCESS MICROPHONE");
       setPhase("error");
     }
   }
@@ -141,117 +142,151 @@ export default function Recorder() {
       router.push("/feed");
     } catch (err) {
       console.error(err);
-      setError((err as Error).message);
+      setError((err as Error).message.toUpperCase());
       setPhase("error");
     }
   }
 
-  const barCount = 32;
+  const barCount = 36;
   const bars = Array.from({ length: barCount }).map((_, i) => {
-    const base = Math.min(1, level * 4);
+    const base = Math.min(1, level * 4.5);
     const jitter = (Math.sin((i + elapsed * 4) * 0.6) + 1) / 2;
-    const h = phase === "recording" ? Math.max(0.12, base * (0.4 + jitter * 0.6)) : 0.1;
+    const h = phase === "recording" ? Math.max(0.12, base * (0.4 + jitter * 0.6)) : 0.08;
     return h;
   });
 
-  return (
-    <div className="max-w-xl mx-auto py-10 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-semibold">
-          {promptId ? "Respond to a whisper" : "Share a voice story"}
-        </h1>
-        <p className="text-white/60 text-sm">
-          Up to {maxSeconds}s. AI will wrap it in matching music and ambient sound.
-        </p>
-      </div>
+  const fmtTime = fmt(elapsed);
+  const fmtMax = fmt(maxSeconds);
 
+  return (
+    <div className="max-w-xl mx-auto py-8 space-y-6">
+      <header className="space-y-1">
+        <div className="font-mono text-[11px] uppercase tracking-caps text-ink-faint flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 bg-signal vu-pulse" />
+          {promptId ? "RESPONDING TO A WHISPER" : "NEW TRANSMISSION"}
+        </div>
+        <h1 className="font-sans text-3xl font-semibold">
+          {promptId ? "Answer the whisper" : "Share a voice story"}
+        </h1>
+        <p className="font-sans text-ink-soft text-sm max-w-md">
+          Up to {maxSeconds}s. AI will wrap it in matching music and ambient
+          sound after you publish.
+        </p>
+      </header>
+
+      {/* Duration selector */}
       {phase === "idle" && (
-        <div className="flex justify-center gap-2">
-          {DURATIONS.map((d) => (
-            <button
-              key={d}
-              onClick={() => setMaxSeconds(d)}
-              className={`px-4 py-2 rounded-full text-sm border ${
-                maxSeconds === d
-                  ? "bg-white text-black border-white"
-                  : "border-white/20 text-white/80 hover:bg-white/10"
-              }`}
-            >
-              {d === 30 ? "30s" : d === 60 ? "1 min" : d === 120 ? "2 min" : "3 min"}
-            </button>
-          ))}
+        <div className="border border-ink">
+          <div className="px-3 py-1.5 border-b border-ink bg-paper-deep font-mono text-[10px] uppercase tracking-caps text-ink-faint">
+            RUNTIME
+          </div>
+          <div className="grid grid-cols-4">
+            {DURATIONS.map((d, i) => (
+              <button
+                key={d}
+                onClick={() => setMaxSeconds(d)}
+                className={`px-3 py-3 font-mono text-[11px] uppercase tracking-caps ${
+                  i > 0 ? "border-l border-ink" : ""
+                } ${
+                  maxSeconds === d
+                    ? "bg-ink text-paper"
+                    : "bg-paper text-ink hover:bg-ink/5"
+                }`}
+              >
+                {d === 30 ? "30 SEC" : d === 60 ? "1 MIN" : d === 120 ? "2 MIN" : "3 MIN"}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-6">
-        <div className="flex items-end justify-center gap-1 h-24">
-          {bars.map((h, i) => (
-            <div
-              key={i}
-              className="w-1.5 bg-gradient-to-t from-fuchsia-400 via-sky-400 to-emerald-300 rounded-full transition-all"
-              style={{ height: `${h * 100}%` }}
-            />
-          ))}
-        </div>
-        <div className="text-center text-white/80 text-sm">
-          {phase === "recording" && (
-            <span className="tabular-nums">
-              {fmt(elapsed)} / {fmt(maxSeconds)}
+      {/* Deck */}
+      <div className="tape-card">
+        <div className="px-4 py-2 border-b border-ink bg-paper-deep flex items-center justify-between font-mono text-[11px] uppercase tracking-caps font-mono-tight">
+          <div className="flex items-center gap-2">
+            <span className={`inline-block w-2 h-2 ${phase === "recording" ? "bg-signal vu-pulse" : "bg-ink/30"}`} />
+            <span>
+              {phase === "recording"
+                ? "REC ● LIVE"
+                : phase === "preview"
+                ? "REC ◼ STOPPED"
+                : phase === "publishing"
+                ? "TRANSMITTING…"
+                : phase === "error"
+                ? "ERROR"
+                : "REC ◉ READY"}
             </span>
-          )}
-          {phase === "preview" && <span>Preview your story, then publish.</span>}
-          {phase === "publishing" && <span>Publishing…</span>}
-          {phase === "idle" && <span>Tap the circle to start recording.</span>}
-          {phase === "error" && <span className="text-red-300">{error}</span>}
+          </div>
+          <span className="text-ink font-semibold">
+            {fmtTime} / {fmtMax}
+          </span>
         </div>
 
-        <div className="flex justify-center">
+        {/* VU bar display */}
+        <div className="mx-4 my-4 bg-ink p-3 border border-ink">
+          <div className="flex items-end gap-[3px]" style={{ height: 56 }}>
+            {bars.map((h, i) => (
+              <span
+                key={i}
+                className="flex-1"
+                style={{
+                  height: `${Math.max(4, h * 100)}%`,
+                  minWidth: "3px",
+                  background: phase === "recording" ? "#e8754a" : "#3a3530",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Transport */}
+        <div className="px-4 pb-4">
           {phase === "idle" || phase === "error" ? (
             <button
               onClick={startRecording}
-              className="w-20 h-20 rounded-full bg-red-500 hover:bg-red-400 transition"
-              aria-label="Start recording"
-            />
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-signal text-paper font-mono text-xs uppercase tracking-caps hover:bg-signal-deep transition-colors shadow-tape-sm"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-paper" />
+              ◉ START RECORDING
+            </button>
           ) : phase === "recording" ? (
             <button
               onClick={stopRecording}
-              className="w-20 h-20 rounded-full bg-red-500 ring-8 ring-red-500/30 hover:bg-red-400 transition flex items-center justify-center"
-              aria-label="Stop recording"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-ink text-paper font-mono text-xs uppercase tracking-caps hover:bg-signal transition-colors shadow-tape-sm"
             >
-              <span className="w-6 h-6 bg-white rounded" />
+              ◼ STOP RECORDING
             </button>
-          ) : null}
-        </div>
-
-        {phase === "preview" && blob && (
-          <div className="space-y-4">
-            <audio
-              controls
-              className="w-full"
-              src={URL.createObjectURL(blob)}
-            />
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={reset}
-                className="px-4 py-2 rounded-full text-sm bg-white/10 hover:bg-white/20"
-              >
-                Re-record
-              </button>
-              <button
-                onClick={publish}
-                className="px-5 py-2 rounded-full text-sm font-medium bg-white text-black hover:bg-white/90"
-              >
-                Publish story
-              </button>
+          ) : phase === "preview" && blob ? (
+            <div className="space-y-3">
+              <audio controls className="w-full" src={URL.createObjectURL(blob)} />
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={reset}
+                  className="px-3 py-2.5 border border-ink font-mono text-[11px] uppercase tracking-caps hover:bg-ink hover:text-paper transition-colors"
+                >
+                  [ RE-RECORD ]
+                </button>
+                <button
+                  onClick={publish}
+                  className="px-3 py-2.5 bg-signal text-paper font-mono text-[11px] uppercase tracking-caps hover:bg-signal-deep transition-colors shadow-tape-sm"
+                >
+                  ◉ PUBLISH TO FEED
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          ) : phase === "publishing" ? (
+            <div className="py-4 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-caps text-ink">
+              <span className="inline-block w-2 h-2 bg-signal vu-pulse" />
+              TRANSMITTING…
+            </div>
+          ) : null}
 
-        {phase === "publishing" && (
-          <div className="flex justify-center">
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          </div>
-        )}
+          {error && (
+            <div className="mt-3 px-3 py-2 border border-signal-deep bg-signal/10 font-mono text-[10px] uppercase tracking-caps text-signal-deep">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

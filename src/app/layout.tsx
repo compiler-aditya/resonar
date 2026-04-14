@@ -22,6 +22,7 @@ export default function RootLayout({
             </Link>
             <div className="flex items-center gap-4 text-sm text-white/70">
               <Link href="/feed" className="hover:text-white">Feed</Link>
+              <Link href="/search" className="hover:text-white">Search</Link>
               <Link href="/record" className="hover:text-white">Record</Link>
               <Link href="/daily" className="hover:text-white">Daily</Link>
             </div>

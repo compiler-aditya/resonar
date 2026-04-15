@@ -16,14 +16,20 @@
   --plum-tint: #e8dfe2;
   --olive: #6a7548;
   --sienna: #c4704a;
+
+  /* Self-hosted fonts via fontsource — no network, no retry spam */
+  --font-sora: "Sora Variable", system-ui, -apple-system, "Segoe UI",
+    "Noto Sans", "Noto Sans Arabic", "Noto Sans Devanagari",
+    "Noto Sans CJK SC", "Noto Sans JP", sans-serif;
+  --font-newsreader: "Newsreader Variable", Georgia, Cambria, "Noto Serif",
+    "Noto Naskh Arabic", "Noto Serif Devanagari", "Noto Serif CJK SC",
+    "Noto Serif JP", serif;
 }
 
 html, body {
   background: var(--sand);
   color: var(--espresso);
-  font-family: var(--font-sora), system-ui, -apple-system, "Segoe UI",
-    "Noto Sans", "Noto Sans Arabic", "Noto Sans Devanagari", "Noto Sans CJK SC",
-    "Noto Sans JP", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-family: var(--font-sora);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -43,7 +49,7 @@ body::before {
 
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-sora), system-ui, sans-serif;
+    font-family: var(--font-sora);
     color: var(--espresso);
     letter-spacing: -0.01em;
   }
@@ -61,9 +67,7 @@ body::before {
   }
 
   .serif-italic {
-    font-family: var(--font-newsreader), Georgia, Cambria, "Noto Serif",
-      "Noto Naskh Arabic", "Noto Serif Devanagari", "Noto Serif CJK SC",
-      "Noto Serif JP", serif;
+    font-family: var(--font-newsreader);
     font-style: italic;
   }
 

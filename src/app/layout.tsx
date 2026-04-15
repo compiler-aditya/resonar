@@ -1,49 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sora, Newsreader } from "next/font/google";
 import PageTransition from "@/components/PageTransition";
 import BottomNav from "@/components/BottomNav";
 import Sidebar from "@/components/Sidebar";
 import RightRail from "@/components/RightRail";
 import MobileProfileButton from "@/components/MobileProfileButton";
 import { MicIcon } from "@/components/Icons";
+
+// Self-hosted fonts via fontsource. No network calls at build or dev time,
+// no "Failed to find font override values" warnings, no retry spam.
+import "@fontsource-variable/sora";
+import "@fontsource-variable/newsreader";
+import "@fontsource-variable/newsreader/wght-italic.css";
+
 import "./globals.css";
-
-const sora = Sora({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-sora",
-  display: "swap",
-  fallback: [
-    "system-ui",
-    "-apple-system",
-    "Segoe UI",
-    "Noto Sans",
-    "Noto Sans Arabic",
-    "Noto Sans Devanagari",
-    "Noto Sans CJK SC",
-    "Noto Sans JP",
-    "sans-serif",
-  ],
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600"],
-  style: ["italic", "normal"],
-  variable: "--font-newsreader",
-  display: "swap",
-  fallback: [
-    "Georgia",
-    "Cambria",
-    "Noto Serif",
-    "Noto Naskh Arabic",
-    "Noto Serif Devanagari",
-    "Noto Serif CJK SC",
-    "Noto Serif JP",
-    "serif",
-  ],
-});
 
 export const metadata: Metadata = {
   title: "resonar. stories wrapped warm.",
@@ -63,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${newsreader.variable}`}>
+    <html lang="en">
       <body className="min-h-screen pb-36 lg:pb-0">
         {/* Mobile / tablet header — hidden on lg */}
         <header className="lg:hidden pt-6 pb-3 px-5">

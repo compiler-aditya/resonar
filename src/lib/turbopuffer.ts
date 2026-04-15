@@ -139,7 +139,7 @@ export async function getStory(id: string): Promise<StoryRow | null> {
   const res = await storiesNs().query({
     filters: ["id", "Eq", id] as Filter,
     top_k: 1,
-    include_attributes: STORY_LIST_ATTRS,
+    include_attributes: true,
   });
   const rows = res.rows ?? [];
   if (rows.length === 0) return null;

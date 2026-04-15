@@ -63,6 +63,26 @@ RULES FOR AUDIO PROMPTS:
 - sfx_prompt should evoke the WORLD the storyteller is describing, not just generic ambience
 - Both prompts must be concise — ElevenLabs performs best with focused, specific prompts`;
 
+async function withGeminiRetry<T>(label: string, fn: () => Promise<T>, maxAttempts = 4): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const is503 = /503|unavailable|high demand|overloaded/i.test(msg);
+      const is429 = /429|rate/i.test(msg);
+      const retryable = is503 || is429;
+      console.warn(`[gemini] ${label} attempt ${attempt} failed: ${msg.slice(0, 140)}`);
+      if (!retryable || attempt === maxAttempts) break;
+      const delay = 1500 * Math.pow(2, attempt - 1);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
+}
+
 function stripJsonFences(text: string): string {
   let t = text.trim();
   if (t.startsWith("```")) {
@@ -98,8 +118,10 @@ export async function analyzeStory(
     .replace("{transcript}", transcript.replace(/"/g, '\\"'))
     .replace(/\{language\}/g, languageCode)
     .replace("{duration}", String(Math.round(durationSeconds)));
-  const res = await model.generateContent(prompt);
-  const text = res.response.text();
+  const text = await withGeminiRetry("analyzeStory", async () => {
+    const res = await model.generateContent(prompt);
+    return res.response.text();
+  });
   const parsed = parseJsonWithRepair<StoryAnalysis>(text);
   return {
     emotion_primary: String(parsed.emotion_primary || "reflection"),
@@ -245,11 +267,13 @@ Return ONLY valid JSON — an array of 3 prompt objects:
 
 export async function embed(text: string): Promise<number[]> {
   const model = genai.getGenerativeModel({ model: EMBED_MODEL });
-  const res = await model.embedContent({
-    content: { role: "user", parts: [{ text }] },
-    outputDimensionality: EMBED_DIM,
-  } as unknown as Parameters<typeof model.embedContent>[0]);
-  const values = res.embedding.values;
+  const values = await withGeminiRetry("embed", async () => {
+    const res = await model.embedContent({
+      content: { role: "user", parts: [{ text }] },
+      outputDimensionality: EMBED_DIM,
+    } as unknown as Parameters<typeof model.embedContent>[0]);
+    return res.embedding.values;
+  });
   if (values.length !== EMBED_DIM) {
     throw new Error(`embed: expected ${EMBED_DIM} dims, got ${values.length}`);
   }

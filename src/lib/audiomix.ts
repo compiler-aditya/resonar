@@ -1,11 +1,32 @@
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import fsSync from "node:fs";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
 
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+// Prefer a modern system ffmpeg (conda env / apt / brew) over the 2018
+// static binary bundled by @ffmpeg-installer/ffmpeg. The bundled version
+// predates `amix=normalize=0` (ffmpeg 4.4+) which breaks our mix filter.
+function resolveFfmpegBinary(): string {
+  const envPath = process.env.FFMPEG_PATH;
+  if (envPath && fsSync.existsSync(envPath)) return envPath;
+  const candidates = [
+    "/usr/bin/ffmpeg",
+    "/usr/local/bin/ffmpeg",
+    "/opt/homebrew/bin/ffmpeg",
+    `${process.env.HOME}/miniconda3/envs/aditya/bin/ffmpeg`,
+  ];
+  for (const p of candidates) {
+    if (p && fsSync.existsSync(p)) return p;
+  }
+  return ffmpegInstaller.path;
+}
+
+const FFMPEG_BIN = resolveFfmpegBinary();
+ffmpeg.setFfmpegPath(FFMPEG_BIN);
+console.log(`[audiomix] ffmpeg binary: ${FFMPEG_BIN}`);
 
 const MP3_RATE = 44100;
 const MP3_BITRATE = "128k";

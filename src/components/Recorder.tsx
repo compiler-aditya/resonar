@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MicIcon } from "./Icons";
+import { useGuest } from "./UseGuest";
 
 const DURATIONS = [30, 60, 120, 180] as const;
 
@@ -10,7 +12,11 @@ export default function Recorder() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const promptId = searchParams.get("prompt");
+  const guest = useGuest();
+  const hasVoice = Boolean(guest?.voiceId);
 
+  const [mode, setMode] = useState<"record" | "text">("record");
+  const [text, setText] = useState("");
   const [maxSeconds, setMaxSeconds] = useState<number>(60);
   const [phase, setPhase] = useState<"idle" | "recording" | "preview" | "publishing" | "error">("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -148,6 +154,30 @@ export default function Recorder() {
     }
   }
 
+  async function publishText() {
+    if (text.trim().length < 20) {
+      setError("Write at least a few sentences.");
+      return;
+    }
+    setPhase("publishing");
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("text", text.trim());
+      if (promptId) form.append("prompt_id", promptId);
+      const res = await fetch("/api/stories", { method: "POST", body: form });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || (await res.text()));
+      }
+      router.push("/feed");
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message);
+      setPhase("error");
+    }
+  }
+
   const barCount = 36;
   const bars = Array.from({ length: barCount }).map((_, i) => {
     const base = Math.min(1, level * 4.5);
@@ -174,8 +204,95 @@ export default function Recorder() {
         </p>
       </header>
 
-      {/* Duration selector */}
-      {phase === "idle" && (
+      {/* Mode selector */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setMode("record")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            mode === "record"
+              ? "bg-plum text-cream shadow-cozy-sm"
+              : "bg-cream text-espresso-soft hover:bg-plum-tint hover:text-plum"
+          }`}
+        >
+          Record
+        </button>
+        <button
+          onClick={() => setMode("text")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            mode === "text"
+              ? "bg-plum text-cream shadow-cozy-sm"
+              : "bg-cream text-espresso-soft hover:bg-plum-tint hover:text-plum"
+          }`}
+        >
+          Type in my voice
+        </button>
+      </div>
+
+      {/* Text mode */}
+      {mode === "text" && (
+        <div className="cozy-card p-5 space-y-4">
+          {!hasVoice ? (
+            <div className="space-y-3">
+              <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
+                Voice not set up yet
+              </div>
+              <p className="font-sans text-sm text-espresso-soft">
+                To publish typed stories in your own voice, record a short
+                reference first. It takes about 30 seconds.
+              </p>
+              <Link
+                href="/voice/setup"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-plum text-cream font-sans text-sm font-semibold hover:bg-plum-deep transition-colors shadow-cozy-sm"
+              >
+                <MicIcon className="w-4 h-4" />
+                Set up my voice
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-olive">
+                  Publishing in your voice
+                </div>
+                <Link
+                  href="/voice/setup"
+                  className="font-sans text-[10px] text-espresso-faint hover:text-plum"
+                >
+                  change
+                </Link>
+              </div>
+              <textarea
+                dir="auto"
+                rows={7}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Write your story in any language. Resonar will read it back in your own voice and wrap it in matching atmosphere."
+                className="w-full px-0 py-2 bg-transparent font-sans text-base text-espresso placeholder:text-espresso-faint focus:outline-none resize-none"
+              />
+              <div className="flex items-center justify-between">
+                <span className="font-sans text-[11px] text-espresso-faint tabular-nums">
+                  {text.trim().length} characters · ≈{Math.max(5, Math.round(text.trim().length / 16))}s
+                </span>
+                <button
+                  onClick={publishText}
+                  disabled={phase === "publishing" || text.trim().length < 20}
+                  className="px-5 py-2.5 rounded-full bg-plum text-cream font-sans text-sm font-semibold hover:bg-plum-deep transition-colors shadow-cozy-sm disabled:opacity-40"
+                >
+                  {phase === "publishing" ? "Publishing…" : "Publish ↗"}
+                </button>
+              </div>
+              {error && (
+                <div className="px-3 py-2 rounded-2xl bg-rust-soft text-rust text-xs font-medium">
+                  {error}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Duration selector (record mode only) */}
+      {mode === "record" && phase === "idle" && (
         <div className="flex gap-2 flex-wrap">
           {DURATIONS.map((d) => (
             <button
@@ -194,7 +311,7 @@ export default function Recorder() {
       )}
 
       {/* Deck */}
-      <div className="cozy-card p-5 space-y-5">
+      {mode === "record" && <div className="cozy-card p-5 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={`inline-block w-2 h-2 rounded-full ${phase === "recording" ? "bg-sienna soft-pulse" : "bg-espresso/20"}`} />
@@ -277,7 +394,7 @@ export default function Recorder() {
             {error}
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

@@ -74,6 +74,15 @@ export default function Sidebar() {
         Record a story
       </Link>
 
+      {!guest?.voiceId && (
+        <Link
+          href="/voice/setup"
+          className="mt-2 text-center font-sans text-[11px] text-olive font-semibold hover:text-plum transition-colors"
+        >
+          ◌ Teach Resonar your voice
+        </Link>
+      )}
+
       <div className="mt-auto pt-6">
         {username && guestId ? (
           <Link

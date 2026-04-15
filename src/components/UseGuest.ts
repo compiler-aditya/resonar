@@ -1,10 +1,11 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 export interface Guest {
   guestId: string;
   username: string;
+  voiceId?: string | null;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -16,6 +17,10 @@ export function useGuest(): Guest | null {
   });
   if (!data?.guestId || !data?.username) return null;
   return data;
+}
+
+export function refreshGuest() {
+  return mutate("/api/me");
 }
 
 export function initialFor(name: string): string {

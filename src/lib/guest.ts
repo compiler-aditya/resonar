@@ -33,6 +33,7 @@ export function generateRandomName(): string {
 export interface GuestSession {
   guestId: string;
   username: string;
+  voiceId?: string;
 }
 
 function encode(session: GuestSession): string {

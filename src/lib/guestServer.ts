@@ -27,3 +27,16 @@ export async function getCurrentGuest(): Promise<GuestSession> {
   }
   return fresh;
 }
+
+export async function updateGuestSession(patch: Partial<GuestSession>): Promise<GuestSession> {
+  const current = await getCurrentGuest();
+  const next: GuestSession = { ...current, ...patch };
+  const store = cookies();
+  store.set(GUEST_COOKIE_NAME, encodeGuest(next), {
+    httpOnly: false,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  return next;
+}

@@ -9,5 +9,6 @@ export async function GET() {
   return NextResponse.json({
     guestId: guest.guestId,
     username: guest.username,
+    voiceId: guest.voiceId ?? null,
   });
 }

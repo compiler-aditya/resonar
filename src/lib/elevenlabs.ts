@@ -149,6 +149,57 @@ export async function generateMusic(
   });
 }
 
+export interface CloneVoiceInput {
+  name: string;
+  description?: string;
+  audio: Buffer;
+  mime?: string;
+  filename?: string;
+}
+
+export async function cloneVoice(input: CloneVoiceInput): Promise<string> {
+  const key = process.env.ELEVENLABS_API_KEY || "";
+  if (!key) throw new Error("ELEVENLABS_API_KEY not set");
+
+  trackUsage("tts");
+  return withRetry("voice-clone", async () => {
+    const form = new FormData();
+    form.append("name", input.name);
+    if (input.description) form.append("description", input.description);
+    const ab = input.audio.buffer.slice(
+      input.audio.byteOffset,
+      input.audio.byteOffset + input.audio.byteLength,
+    ) as ArrayBuffer;
+    form.append(
+      "files",
+      new Blob([ab], { type: input.mime || "audio/webm" }),
+      input.filename || "reference.webm",
+    );
+
+    const res = await fetch("https://api.elevenlabs.io/v1/voices/add", {
+      method: "POST",
+      headers: { "xi-api-key": key },
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`voices/add → ${res.status}: ${text.slice(0, 240)}`);
+    }
+    const json = (await res.json()) as { voice_id?: string; requires_verification?: boolean };
+    if (!json.voice_id) throw new Error("voices/add returned no voice_id");
+    return json.voice_id;
+  });
+}
+
+export async function deleteClonedVoice(voiceId: string): Promise<void> {
+  const key = process.env.ELEVENLABS_API_KEY || "";
+  if (!key) return;
+  await fetch(`https://api.elevenlabs.io/v1/voices/${voiceId}`, {
+    method: "DELETE",
+    headers: { "xi-api-key": key },
+  }).catch(() => {});
+}
+
 export async function generateSFX(
   prompt: string,
   durationSeconds: number,

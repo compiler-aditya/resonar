@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MicIcon } from "./Icons";
+import { MicIcon, PlayIcon, PauseIcon } from "./Icons";
 import { refreshGuest, useGuest } from "./UseGuest";
 
 const MIN_SECONDS = 25;
@@ -17,7 +17,10 @@ export default function VoiceCloner() {
   const guest = useGuest();
   const alreadyCloned = Boolean(guest?.voiceId);
 
-  const [phase, setPhase] = useState<"idle" | "recording" | "preview" | "uploading" | "done" | "error">("idle");
+  const [phase, setPhase] = useState<"idle" | "recording" | "preview" | "uploading" | "cloned" | "error">("idle");
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -147,13 +150,53 @@ export default function VoiceCloner() {
         throw new Error(j.error || (await res.text()));
       }
       await refreshGuest();
-      setPhase("done");
-      setTimeout(() => router.push("/record"), 1200);
+      setPhase("cloned");
     } catch (err) {
       console.error(err);
       setError((err as Error).message);
       setPhase("error");
     }
+  }
+
+  async function togglePreview() {
+    if (previewAudioRef.current) {
+      if (previewPlaying) {
+        previewAudioRef.current.pause();
+        setPreviewPlaying(false);
+      } else {
+        previewAudioRef.current.currentTime = 0;
+        previewAudioRef.current.play().catch(() => {});
+        setPreviewPlaying(true);
+      }
+      return;
+    }
+    setPreviewLoading(true);
+    try {
+      const res = await fetch(`/api/voice/preview?t=${Date.now()}`);
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "preview failed");
+      const audioBlob = await res.blob();
+      const url = URL.createObjectURL(audioBlob);
+      const audio = new Audio(url);
+      audio.onended = () => setPreviewPlaying(false);
+      audio.onpause = () => setPreviewPlaying(false);
+      previewAudioRef.current = audio;
+      setPreviewLoading(false);
+      audio.play().catch(() => {});
+      setPreviewPlaying(true);
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message);
+      setPreviewLoading(false);
+    }
+  }
+
+  function reclone() {
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current = null;
+    }
+    setPreviewPlaying(false);
+    reset();
   }
 
   const barCount = 36;
@@ -210,8 +253,8 @@ export default function VoiceCloner() {
                 ? "Preview"
                 : phase === "uploading"
                 ? "Cloning your voice…"
-                : phase === "done"
-                ? "Done — redirecting"
+                : phase === "cloned"
+                ? "Voice cloned"
                 : phase === "error"
                 ? "Error"
                 : "Ready"}
@@ -282,9 +325,50 @@ export default function VoiceCloner() {
             <span className="w-1.5 h-1.5 rounded-full bg-sienna soft-pulse" />
             Cloning your voice…
           </div>
-        ) : phase === "done" ? (
-          <div className="py-3 flex items-center justify-center gap-2 text-sm text-plum font-semibold">
-            ✓ Voice cloned. Redirecting to record…
+        ) : phase === "cloned" ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-olive font-semibold">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-olive" />
+              ✓ Voice cloned. Hear it back before you continue.
+            </div>
+            <div className="bg-plum-mist rounded-[18px] p-4 flex items-center gap-3">
+              <button
+                onClick={togglePreview}
+                disabled={previewLoading}
+                className="w-11 h-11 rounded-full bg-plum text-cream flex items-center justify-center shrink-0 hover:bg-plum-deep transition-colors shadow-cozy-sm disabled:opacity-50"
+                aria-label={previewPlaying ? "Pause preview" : "Play preview"}
+              >
+                {previewLoading ? (
+                  <span className="w-3 h-3 rounded-full bg-cream soft-pulse" />
+                ) : previewPlaying ? (
+                  <PauseIcon className="w-5 h-5" />
+                ) : (
+                  <PlayIcon className="w-5 h-5 ml-0.5" />
+                )}
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="font-sans text-[11px] uppercase tracking-[0.12em] text-plum font-semibold mb-1">
+                  {previewLoading ? "Synthesising…" : previewPlaying ? "Playing preview" : "Tap to hear your voice"}
+                </div>
+                <p className="serif-italic text-espresso-soft text-[13px] leading-snug">
+                  &ldquo;Hi — this is my voice on Resonar. Stories, wrapped warm.&rdquo;
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={reclone}
+                className="px-3 py-3 rounded-full bg-sand-soft text-espresso-soft font-sans text-sm font-medium hover:bg-plum-tint hover:text-plum transition-colors"
+              >
+                Re-record reference
+              </button>
+              <button
+                onClick={() => router.push("/record")}
+                className="px-3 py-3 rounded-full bg-plum text-cream font-sans text-sm font-semibold hover:bg-plum-deep transition-colors shadow-cozy-sm"
+              >
+                Continue ↗
+              </button>
+            </div>
           </div>
         ) : null}
 

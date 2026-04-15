@@ -134,8 +134,21 @@ export default function StoryCard({ story }: StoryCardProps) {
               )}
             </div>
           </div>
-          <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-espresso-faint mt-0.5">
-            {live.country || "—"} · {timeAgoShort(live.created_at)}
+          <div className="font-sans text-[10px] tracking-[0.1em] uppercase text-espresso-faint mt-0.5 flex items-center gap-1.5">
+            <span>{live.country || "—"}</span>
+            <span>·</span>
+            <span>{timeAgoShort(live.created_at)}</span>
+            {isForeignLanguage(live.language) && (
+              <>
+                <span>·</span>
+                <span
+                  className="px-1.5 py-px rounded-full bg-olive-soft text-olive text-[9px] font-bold tracking-[0.12em]"
+                  title={languageName(live.language)}
+                >
+                  {languageShort(live.language)}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -249,6 +262,58 @@ function timeAgoShort(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: "English",
+  es: "Español",
+  fr: "Français",
+  pt: "Português",
+  de: "Deutsch",
+  it: "Italiano",
+  nl: "Nederlands",
+  pl: "Polski",
+  ru: "Русский",
+  uk: "Українська",
+  tr: "Türkçe",
+  ar: "العربية",
+  he: "עברית",
+  fa: "فارسی",
+  hi: "हिन्दी",
+  bn: "বাংলা",
+  ta: "தமிழ்",
+  te: "తెలుగు",
+  mr: "मराठी",
+  ur: "اردو",
+  zh: "中文",
+  ja: "日本語",
+  ko: "한국어",
+  vi: "Tiếng Việt",
+  th: "ไทย",
+  id: "Bahasa Indonesia",
+  ms: "Bahasa Melayu",
+  sw: "Kiswahili",
+  yo: "Yorùbá",
+};
+
+function normalizeLang(code?: string | null): string {
+  if (!code) return "";
+  return code.toLowerCase().split(/[-_]/)[0];
+}
+
+function isForeignLanguage(code?: string | null): boolean {
+  const c = normalizeLang(code);
+  return c.length > 0 && c !== "en";
+}
+
+function languageShort(code?: string | null): string {
+  const c = normalizeLang(code);
+  return c.toUpperCase();
+}
+
+function languageName(code?: string | null): string {
+  const c = normalizeLang(code);
+  return LANGUAGE_NAMES[c] || c.toUpperCase();
 }
 
 function avatarColorFor(emotion: string): string {

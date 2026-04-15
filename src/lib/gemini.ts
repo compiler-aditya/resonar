@@ -7,8 +7,9 @@ if (!apiKey) {
 
 const genai = new GoogleGenerativeAI(apiKey || "");
 
-const FLASH_MODEL = "gemini-2.0-flash";
-const EMBED_MODEL = "text-embedding-004";
+const FLASH_MODEL = "gemini-2.5-flash";
+const EMBED_MODEL = "gemini-embedding-001";
+const EMBED_DIM = 768;
 
 export interface StoryAnalysis {
   emotion_primary: string;
@@ -244,8 +245,15 @@ Return ONLY valid JSON — an array of 3 prompt objects:
 
 export async function embed(text: string): Promise<number[]> {
   const model = genai.getGenerativeModel({ model: EMBED_MODEL });
-  const res = await model.embedContent(text);
-  return res.embedding.values;
+  const res = await model.embedContent({
+    content: { role: "user", parts: [{ text }] },
+    outputDimensionality: EMBED_DIM,
+  } as unknown as Parameters<typeof model.embedContent>[0]);
+  const values = res.embedding.values;
+  if (values.length !== EMBED_DIM) {
+    throw new Error(`embed: expected ${EMBED_DIM} dims, got ${values.length}`);
+  }
+  return values;
 }
 
 function clamp(n: number, lo: number, hi: number): number {

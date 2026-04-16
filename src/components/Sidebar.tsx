@@ -19,6 +19,7 @@ const NAV: Array<{
 }> = [
   { label: "Home", icon: HomeIcon, href: () => "/feed", match: (p) => p === "/" || p.startsWith("/feed") },
   { label: "Search", icon: SearchIcon, href: () => "/search", match: (p) => p.startsWith("/search") },
+  { label: "Globe", icon: GlobeNavIcon, href: () => "/globe", match: (p) => p.startsWith("/globe") },
   { label: "Daily", icon: LibraryIcon, href: () => "/daily", match: (p) => p.startsWith("/daily") },
   {
     label: "Profile",
@@ -27,6 +28,15 @@ const NAV: Array<{
     match: (p) => p.startsWith("/profile"),
   },
 ];
+
+function GlobeNavIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx={12} cy={12} r={9} />
+      <path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18" />
+    </svg>
+  );
+}
 
 export default function Sidebar() {
   const pathname = usePathname() || "/";

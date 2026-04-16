@@ -35,16 +35,23 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-/* Gentle radial tint in the corners to hint at warmth without looking like a gradient */
+/* Collective-mood corner wash. --mood-hue is set by MoodWash.tsx from the
+ * 24h emotion aggregate. Falls back to plum + sienna when no signal. */
+:root {
+  --mood-hue: 325 45% 55%;
+  --mood-hue-secondary: 24 60% 50%;
+}
+
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 10% 0%, rgba(138, 100, 120, 0.10) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(196, 112, 74, 0.06) 0%, transparent 45%);
   z-index: -1;
+  background:
+    radial-gradient(circle at 10% 0%, hsl(var(--mood-hue) / 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 100% 100%, hsl(var(--mood-hue-secondary) / 0.08) 0%, transparent 50%);
+  transition: background 1.5s ease-in-out;
 }
 
 @layer base {

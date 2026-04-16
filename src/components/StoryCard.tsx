@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import ReactionBar from "./ReactionBar";
 import Waveform from "./Waveform";
 import { PlayIcon, PauseIcon, FlowerIcon } from "./Icons";
+import { usePlayer } from "@/lib/player";
 
 export interface StoryCardData {
   id: string;
@@ -57,43 +58,42 @@ export default function StoryCard({ story }: StoryCardProps) {
     ? live.audio_atmosphere_url
     : live.audio_raw_url;
 
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [progress, setProgress] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  // global player integration
+  const playerKey = `story:${live.id}:${mode}`;
+  const current = usePlayer((s) => s.current);
+  const playingGlobal = usePlayer((s) => s.playing);
+  const progressGlobal = usePlayer((s) => s.progress);
+  const durationGlobal = usePlayer((s) => s.duration);
+  const playAction = usePlayer((s) => s.play);
+  const toggle = usePlayer((s) => s.toggle);
 
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    const onTime = () => {
-      if (el.duration > 0) setProgress(el.currentTime / el.duration);
-    };
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-    el.addEventListener("timeupdate", onTime);
-    el.addEventListener("play", onPlay);
-    el.addEventListener("pause", onPause);
-    el.addEventListener("ended", onPause);
-    return () => {
-      el.removeEventListener("timeupdate", onTime);
-      el.removeEventListener("play", onPlay);
-      el.removeEventListener("pause", onPause);
-      el.removeEventListener("ended", onPause);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.load();
-    setProgress(0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
+  const isSelected = current?.key === playerKey;
+  const isPlaying = isSelected && playingGlobal;
+  const progress = isSelected && durationGlobal > 0 ? progressGlobal / durationGlobal : 0;
 
   const togglePlay = () => {
-    const el = audioRef.current;
-    if (!el) return;
-    if (el.paused) el.play().catch(() => {});
-    else el.pause();
+    if (isSelected) {
+      toggle();
+    } else {
+      playAction({
+        key: playerKey,
+        kind: "story",
+        src,
+        title: live.emotional_essence?.slice(0, 80) || live.username,
+        subtitle: `${live.username} · ${live.emotion_primary}`,
+        targetUrl: `/story/${live.id}`,
+      });
+    }
   };
+
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    if (isSelected && typeof window !== "undefined") {
+      setAudioEl(window.__resonarAudio ?? null);
+    } else {
+      setAudioEl(null);
+    }
+  }, [isSelected]);
 
   const initial = live.username.slice(0, 1).toUpperCase();
   const avatarColor = useMemo(() => avatarColorFor(live.emotion_primary), [live.emotion_primary]);
@@ -167,9 +167,9 @@ export default function StoryCard({ story }: StoryCardProps) {
         <button
           onClick={togglePlay}
           className="w-11 h-11 rounded-full bg-plum text-cream flex items-center justify-center shrink-0 hover:bg-plum-deep transition-colors shadow-cozy-sm"
-          aria-label={playing ? "Pause" : "Play"}
+          aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {playing ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5 ml-0.5" />}
+          {isPlaying ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5 ml-0.5" />}
         </button>
         <div className="flex-1 min-w-0">
           <Waveform
@@ -177,6 +177,8 @@ export default function StoryCard({ story }: StoryCardProps) {
             bars={36}
             progress={progress}
             height={34}
+            audioEl={audioEl}
+            playing={isPlaying}
           />
           <div className="flex items-center justify-between mt-1">
             <span className="font-sans text-[11px] text-espresso-faint font-medium tabular-nums">
@@ -198,8 +200,6 @@ export default function StoryCard({ story }: StoryCardProps) {
           </div>
         </div>
       </div>
-
-      <audio ref={audioRef} src={src} preload="metadata" className="sr-only-audio" />
 
       {/* Reactions + thread link */}
       <div className="flex items-center justify-between gap-3 pt-1">
@@ -265,52 +265,25 @@ function timeAgoShort(iso: string): string {
 }
 
 const LANGUAGE_NAMES: Record<string, string> = {
-  en: "English",
-  es: "Español",
-  fr: "Français",
-  pt: "Português",
-  de: "Deutsch",
-  it: "Italiano",
-  nl: "Nederlands",
-  pl: "Polski",
-  ru: "Русский",
-  uk: "Українська",
-  tr: "Türkçe",
-  ar: "العربية",
-  he: "עברית",
-  fa: "فارسی",
-  hi: "हिन्दी",
-  bn: "বাংলা",
-  ta: "தமிழ்",
-  te: "తెలుగు",
-  mr: "मराठी",
-  ur: "اردو",
-  zh: "中文",
-  ja: "日本語",
-  ko: "한국어",
-  vi: "Tiếng Việt",
-  th: "ไทย",
-  id: "Bahasa Indonesia",
-  ms: "Bahasa Melayu",
-  sw: "Kiswahili",
-  yo: "Yorùbá",
+  en: "English", es: "Español", fr: "Français", pt: "Português", de: "Deutsch",
+  it: "Italiano", nl: "Nederlands", pl: "Polski", ru: "Русский", uk: "Українська",
+  tr: "Türkçe", ar: "العربية", he: "עברית", fa: "فارسی", hi: "हिन्दी",
+  bn: "বাংলা", ta: "தமிழ்", te: "తెలుగు", mr: "मराठी", ur: "اردو",
+  zh: "中文", ja: "日本語", ko: "한국어", vi: "Tiếng Việt", th: "ไทย",
+  id: "Bahasa Indonesia", ms: "Bahasa Melayu", sw: "Kiswahili", yo: "Yorùbá",
 };
 
 function normalizeLang(code?: string | null): string {
   if (!code) return "";
   return code.toLowerCase().split(/[-_]/)[0];
 }
-
 function isForeignLanguage(code?: string | null): boolean {
   const c = normalizeLang(code);
   return c.length > 0 && c !== "en";
 }
-
 function languageShort(code?: string | null): string {
-  const c = normalizeLang(code);
-  return c.toUpperCase();
+  return normalizeLang(code).toUpperCase();
 }
-
 function languageName(code?: string | null): string {
   const c = normalizeLang(code);
   return LANGUAGE_NAMES[c] || c.toUpperCase();
@@ -318,15 +291,9 @@ function languageName(code?: string | null): string {
 
 function avatarColorFor(emotion: string): string {
   const map: Record<string, string> = {
-    nostalgia: "#6b4a5c",
-    joy: "#c4803a",
-    grief: "#8b3a2c",
-    tenderness: "#b04b5e",
-    loneliness: "#4f5b70",
-    anger: "#a03828",
-    gratitude: "#6a7548",
-    anxiety: "#c4704a",
-    excitement: "#a74e5c",
+    nostalgia: "#6b4a5c", joy: "#c4803a", grief: "#8b3a2c",
+    tenderness: "#b04b5e", loneliness: "#4f5b70", anger: "#a03828",
+    gratitude: "#6a7548", anxiety: "#c4704a", excitement: "#a74e5c",
     defiance: "#8a4820",
   };
   return map[emotion.toLowerCase()] || "#6b4a5c";
@@ -346,6 +313,7 @@ function emotionChipStyle(emotion: string): { bg: string; fg: string } {
     loneliness: { bg: "#d4d9e2", fg: "#4a5466" },
     anxiety: { bg: "#f0dbc4", fg: "#8a4820" },
     defiance: { bg: "#f0dbc4", fg: "#8a4820" },
+    longing: { bg: "#e5dde8", fg: "#6b4a5c" },
   };
   return map[e] || { bg: "#e8dfe2", fg: "#6b4a5c" };
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MicIcon } from "./Icons";
 import { useGuest } from "./UseGuest";
+import PublishAnimation from "./PublishAnimation";
 
 const DURATIONS = [30, 60, 120, 180] as const;
 
@@ -19,6 +20,7 @@ export default function Recorder() {
   const [text, setText] = useState("");
   const [maxSeconds, setMaxSeconds] = useState<number>(60);
   const [phase, setPhase] = useState<"idle" | "recording" | "preview" | "publishing" | "error">("idle");
+  const [publishedStoryId, setPublishedStoryId] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -146,7 +148,8 @@ export default function Recorder() {
       if (promptId) form.append("prompt_id", promptId);
       const res = await fetch("/api/stories", { method: "POST", body: form });
       if (!res.ok) throw new Error(await res.text());
-      router.push("/feed");
+      const json = (await res.json()) as { jobId?: string };
+      setPublishedStoryId(json.jobId || "pending");
     } catch (err) {
       console.error(err);
       setError((err as Error).message);
@@ -170,7 +173,8 @@ export default function Recorder() {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error || (await res.text()));
       }
-      router.push("/feed");
+      const json = (await res.json()) as { jobId?: string };
+      setPublishedStoryId(json.jobId || "pending");
     } catch (err) {
       console.error(err);
       setError((err as Error).message);
@@ -190,6 +194,11 @@ export default function Recorder() {
 
   return (
     <div className="py-3 space-y-5">
+      <PublishAnimation
+        open={Boolean(publishedStoryId)}
+        seedId={publishedStoryId}
+        onComplete={() => router.push("/feed")}
+      />
       <header className="space-y-2">
         <div className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-sienna">
           {promptId ? "Responding to a whisper" : "New story"}

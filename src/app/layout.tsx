@@ -5,6 +5,9 @@ import BottomNav from "@/components/BottomNav";
 import Sidebar from "@/components/Sidebar";
 import RightRail from "@/components/RightRail";
 import MobileProfileButton from "@/components/MobileProfileButton";
+import MoodWash from "@/components/MoodWash";
+import GlobalAudio from "@/components/GlobalAudio";
+import NowPlaying from "@/components/NowPlaying";
 import { MicIcon } from "@/components/Icons";
 
 // Self-hosted fonts via fontsource. No network calls at build or dev time,
@@ -35,6 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen pb-36 lg:pb-0">
+        <MoodWash />
         {/* Mobile / tablet header — hidden on lg */}
         <header className="lg:hidden pt-6 pb-3 px-5">
           <div className="max-w-md sm:max-w-2xl mx-auto flex items-start justify-between gap-4">
@@ -68,6 +72,8 @@ export default function RootLayout({
           <RightRail />
         </div>
 
+        <GlobalAudio />
+        <NowPlaying />
         <BottomNav />
       </body>
     </html>

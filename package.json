@@ -22,6 +22,7 @@
     "@fontsource-variable/sora": "^5.2.8",
     "@google/generative-ai": "^0.24.1",
     "@turbopuffer/turbopuffer": "^1.22.0",
+    "@types/three": "^0.183.1",
     "cookie": "^1.1.1",
     "drizzle-orm": "^0.45.2",
     "fluent-ffmpeg": "^2.1.3",
@@ -32,8 +33,10 @@
     "postgres": "^3.4.9",
     "react": "^18",
     "react-dom": "^18",
+    "react-globe.gl": "^2.37.1",
     "recharts": "^3.8.1",
     "swr": "^2.4.1",
+    "three": "^0.183.2",
     "wavesurfer.js": "^7.12.6",
     "zustand": "^5.0.12"
   },
